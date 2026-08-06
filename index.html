@@ -303,49 +303,39 @@
             </div>
         </div>
     </div>
+    
     <div id="register-screen" class="max-w-md mx-auto pt-20 px-4 hidden fade-in">
         <button onclick="showScreen('login-screen')" class="text-gray-400 mb-4 hover:text-gray-600">← 返回登录</button>
         <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
             <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">账号注册</h2>
             <div class="space-y-4">
-                <input type="email" id="regEmail" placeholder="输入常用邮箱 (用于接收验证码)" class="w-full border border-gray-300 rounded px-3 py-2 focus:border-blue-500 focus:outline-none">
+                <input type="email" id="regEmail" placeholder="输入常用邮箱 (用于接收确认链接)" class="w-full border border-gray-300 rounded px-3 py-2 focus:border-blue-500 focus:outline-none">
                 <input type="password" id="regPassword" placeholder="设置密码 (至少6位)" class="w-full border border-gray-300 rounded px-3 py-2 focus:border-blue-500 focus:outline-none">
                 <input type="password" id="regConfirmPassword" placeholder="确认密码" class="w-full border border-gray-300 rounded px-3 py-2 focus:border-blue-500 focus:outline-none">
-                <div class="pt-2"><button onclick="handleRegisterSubmit()" class="w-full bg-green-500 text-white font-bold py-3 rounded shadow hover:bg-green-600 transition">获取注册验证码</button></div>
+                <div class="pt-2"><button onclick="handleRegisterSubmit()" class="w-full bg-green-500 text-white font-bold py-3 rounded shadow hover:bg-green-600 transition">提交注册</button></div>
             </div>
         </div>
     </div>
-    <div id="verify-signup-screen" class="max-w-md mx-auto pt-20 px-4 hidden fade-in">
-        <button onclick="showScreen('register-screen')" class="text-gray-400 mb-4 hover:text-gray-600">← 返回重新注册</button>
-        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <h2 class="text-2xl font-bold text-gray-800 mb-2 text-center">验证邮箱</h2>
-            <p class="text-xs text-green-600 text-center mb-6">注册验证码已发送至您的邮箱，请查收</p>
-            <div class="space-y-4">
-                <input type="text" id="verifySignupCodeInput" placeholder="输入邮件中的 6位 验证码" class="w-full border border-gray-300 rounded px-3 py-2 focus:border-blue-500 focus:outline-none tracking-widest">
-                <div class="pt-2"><button onclick="handleVerifySignupCode()" class="w-full bg-green-500 text-white font-bold py-3 rounded shadow hover:bg-green-600 transition">验证并登录</button></div>
-            </div>
-        </div>
-    </div>
+
     <div id="forgot-screen" class="max-w-md mx-auto pt-20 px-4 hidden fade-in">
         <button onclick="showScreen('login-screen')" class="text-gray-400 mb-4 hover:text-gray-600">← 返回登录</button>
         <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
             <h2 class="text-2xl font-bold text-gray-800 mb-2 text-center">找回密码</h2>
-            <p class="text-xs text-gray-500 text-center mb-6">请输入你注册时的邮箱，我们将发送重置验证码给你</p>
+            <p class="text-xs text-gray-500 text-center mb-6">请输入你注册时的邮箱，我们将发送重置链接给你</p>
             <div class="space-y-4">
                 <input type="email" id="forgotEmail" placeholder="输入注册邮箱" class="w-full border border-gray-300 rounded px-3 py-2 focus:border-blue-500 focus:outline-none">
-                <div class="pt-2"><button onclick="handleSendResetCode()" class="w-full bg-blue-500 text-white font-bold py-3 rounded shadow hover:bg-blue-600 transition">发送验证码</button></div>
+                <div class="pt-2"><button onclick="handleSendResetCode()" class="w-full bg-blue-500 text-white font-bold py-3 rounded shadow hover:bg-blue-600 transition">发送重置链接</button></div>
             </div>
         </div>
     </div>
+    
     <div id="reset-screen" class="max-w-md mx-auto pt-20 px-4 hidden fade-in">
-        <button onclick="showScreen('login-screen')" class="text-gray-400 mb-4 hover:text-gray-600">← 取消重置，去登录</button>
         <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
             <h2 class="text-2xl font-bold text-gray-800 mb-2 text-center">设置新密码</h2>
-            <p class="text-xs text-green-600 text-center mb-6">验证码已发送至邮箱，请查收</p>
+            <p class="text-xs text-blue-600 text-center mb-6">链接验证成功，请直接设置您的新密码</p>
             <div class="space-y-4">
-                <input type="text" id="resetCodeInput" placeholder="输入邮件中的 6位 验证码" class="w-full border border-gray-300 rounded px-3 py-2 focus:border-blue-500 focus:outline-none tracking-widest">
                 <input type="password" id="resetNewPassword" placeholder="输入新的密码 (至少6位)" class="w-full border border-gray-300 rounded px-3 py-2 focus:border-blue-500 focus:outline-none">
-                <div class="pt-2"><button onclick="handleDoResetPassword()" class="w-full bg-red-500 text-white font-bold py-3 rounded shadow hover:bg-red-600 transition">确定重置并登录</button></div>
+                <div class="pt-2"><button onclick="handleDoResetPassword()" class="w-full bg-red-500 text-white font-bold py-3 rounded shadow hover:bg-red-600 transition">确定重置并进入后台</button></div>
             </div>
         </div>
     </div>
@@ -693,7 +683,7 @@
         async function handleLogin() {
             let email = document.getElementById('authEmail').value.trim();
             let pwd = document.getElementById('authPassword').value;
-            if(!email || !pwd) return alert('请输入账号 and 密码');
+            if(!email || !pwd) return alert('请输入账号和密码');
             showLoading('登录中...');
             try {
                 const { data, error } = await db.auth.signInWithPassword({ email, password: pwd });
@@ -708,27 +698,16 @@
             let pwd = document.getElementById('regPassword').value;
             if(!email) return alert('请正确填写邮箱！');
             if(pwd.length < 6 || pwd !== document.getElementById('regConfirmPassword').value) return alert('密码无效或不一致！');
-            showLoading('发送验证码中...');
+            showLoading('提交注册中...');
             try {
                 const { data, error } = await db.auth.signUp({ email, password: pwd });
                 hideLoading();
                 if(error) alert('注册失败: ' + error.message);
-                else { registerTargetEmail = email; showScreen('verify-signup-screen'); }
+                else { 
+                    alert('✅ 注册成功！\n\n请前往您的邮箱，点击邮件中的【确认链接】即可完成注册。（可能在垃圾邮件里）'); 
+                    showScreen('login-screen'); 
+                }
             } catch (err) { hideLoading(); alert('错误，请检查网络'); }
-        }
-
-        async function handleVerifySignupCode() {
-            let token = document.getElementById('verifySignupCodeInput').value.trim();
-            if(!token) return alert('请输入验证码');
-            showLoading('正在验证...');
-            const { data, error } = await db.auth.verifyOtp({ email: registerTargetEmail, token: token, type: 'signup' });
-            hideLoading();
-            if(error) alert('验证码错误或已过期！');
-            else {
-                alert('✅ 验证成功！');
-                if(data.session) { currentUser = data.session.user; initCloudData(); }
-                else { document.getElementById('authEmail').value = registerTargetEmail; showScreen('login-screen'); }
-            }
         }
 
         async function handleSendResetCode() {
@@ -738,26 +717,40 @@
             const { error } = await db.auth.resetPasswordForEmail(email);
             hideLoading();
             if(error) alert('发送失败: ' + error.message);
-            else { resetTargetEmail = email; showScreen('reset-screen'); }
+            else { 
+                alert('✅ 密码重置链接已发送！\n\n请前往您的邮箱点击链接，网页将自动唤起并允许您设置新密码。'); 
+                showScreen('login-screen'); 
+            }
         }
 
+        // 🌟 核心：监听用户从邮件里点击链接跳回网页的动作
+        db.auth.onAuthStateChange(async (event, session) => {
+            if (event === 'PASSWORD_RECOVERY') {
+                // 如果检测到是点击“重置密码”链接回来的，直接弹出设置新密码的界面
+                showScreen('reset-screen');
+            }
+        });
+
         async function handleDoResetPassword() {
-            let token = document.getElementById('resetCodeInput').value.trim();
             let newPwd = document.getElementById('resetNewPassword').value;
-            if(!token) return alert('请输入验证码');
             if(newPwd.length < 6) return alert('新密码至少需要6位');
-            showLoading('正在验证并重置...');
-            const { data, error } = await db.auth.verifyOtp({ email: resetTargetEmail, token: token, type: 'recovery' });
-            if(error) { hideLoading(); return alert('验证码错误！'); }
-            const { error: updateError } = await db.auth.updateUser({ password: newPwd });
-            await db.auth.signOut(); hideLoading();
-            if(updateError) return alert('更新失败：' + updateError.message);
-            alert('✅ 密码重置成功！请重新登录。');
-            document.getElementById('authEmail').value = resetTargetEmail; showScreen('login-screen');
+            showLoading('正在重置...');
+            // 直接更新密码，无需验证码
+            const { error } = await db.auth.updateUser({ password: newPwd });
+            hideLoading();
+            if(error) return alert('更新失败：' + error.message);
+            
+            alert('✅ 密码重置成功！');
+            // 重置完毕后直接拿当前 session 进入管理大盘
+            currentUser = (await db.auth.getUser()).data.user;
+            initCloudData();
         }
 
         async function handleLogout() {
-            await db.auth.signOut(); currentUser = null; groupData = []; imageUrlData = {}; showScreen('portal-screen');
+            await db.auth.signOut(); 
+            localStorage.removeItem('assistant_uid'); // 清除副团长状态
+            currentUser = null; groupData = []; imageUrlData = {}; 
+            showScreen('portal-screen');
         }
 
         async function initCloudData() {
