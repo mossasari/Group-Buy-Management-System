@@ -21,7 +21,7 @@
                     <div class="bg-blue-50 p-2 flex items-center justify-between">
                         <label class="flex items-center gap-2 cursor-pointer flex-1">
                             <input type="checkbox" class="w-4 h-4 text-blue-600 export-batch-cb" value="${batch}">
-                            <span class="font-bold text-blue-800">${batch} <span class="text-xs font-normal text-blue-600 ml-1">(共${count}件)</span></span>
+                            <span class="font-bold text-blue-800">${escapeHtml(batch)} <span class="text-xs font-normal text-blue-600 ml-1">(共${count}件)</span></span>
                         </label>
                         <button onclick="document.getElementById('${safeBatchId}').classList.toggle('hidden')" class="text-xs text-blue-600 bg-white border border-blue-200 px-2 py-1 rounded">展开明细</button>
                     </div>
@@ -32,7 +32,7 @@
                     html += `
                         <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer ml-6 border-b border-dashed border-gray-100 pb-1">
                             <input type="checkbox" class="w-3 h-3 text-blue-500 export-item-cb" value="${item.id}" data-batch="${batch}">
-                            <span class="flex-1 truncate">${item.category} - ${item.character}</span>
+                            <span class="flex-1 truncate">${escapeHtml(item.category)} - ${escapeHtml(item.character)}</span>
                             <span class="text-blue-500 font-bold">x${item.count}</span>
                         </label>
                     `;
@@ -98,14 +98,14 @@
             previewHtml += `
                 <div class="text-center font-bold text-lg mb-2 text-gray-800 border-b pb-2">排发清单</div>
                 <div class="text-sm text-gray-600 mb-4 px-2">
-                    <p>cn: <strong class="text-blue-600">${currentShipRawCn}</strong></p>
-                    <p>囤货地: <strong class="text-green-600">${locationName}</strong></p>
+                    <p>cn: <strong class="text-blue-600">${escapeHtml(currentShipRawCn)}</strong></p>
+                    <p>囤货地: <strong class="text-green-600">${escapeHtml(locationName)}</strong></p>
                 </div>
                 <div id="exportDragContainer" class="space-y-1">
             `;
             
             exportFinalList.forEach((line, index) => {
-                let lineText = line.type === 'batch' ? line.name : `${line.name} - ${line.count}`;
+                let lineText = line.type === 'batch' ? escapeHtml(line.name) : `${escapeHtml(line.name)} - ${line.count}`;
                 let lineClass = line.type === 'batch' ? 'font-bold text-gray-800 bg-gray-100' : 'text-gray-600 bg-white border border-gray-100';
                 
                 previewHtml += `
@@ -308,10 +308,10 @@
             let globalBatchIdx = 0;
             for (let cn in exportData) {
                 html += `<div class="mb-4 border border-blue-200 rounded p-3 bg-white shadow-sm">
-                            <div class="font-bold text-lg text-blue-800 border-b border-blue-100 pb-1 mb-2">cn: ${cn}</div>`;
+                            <div class="font-bold text-lg text-blue-800 border-b border-blue-100 pb-1 mb-2">cn: ${escapeHtml(cn)}</div>`;
                 for (let loc in exportData[cn]) {
                     html += `<div class="ml-2 mb-3">
-                                <div class="font-bold text-gray-700 text-sm mb-2 bg-gray-100 inline-block px-2 py-0.5 rounded border border-gray-200">囤货地: ${loc}</div>`;
+                                <div class="font-bold text-gray-700 text-sm mb-2 bg-gray-100 inline-block px-2 py-0.5 rounded border border-gray-200">囤货地: ${escapeHtml(loc)}</div>`;
                     for (let batch in exportData[cn][loc]) {
                         globalBatchIdx++;
                         let items = exportData[cn][loc][batch];
@@ -319,15 +319,15 @@
                         <div class="ml-3 mt-1 border-l-2 border-gray-200 pl-3 pb-2">
                             <div class="flex items-center gap-2 mb-1">
                                 <input type="checkbox" class="export-batch-cb w-4 h-4 cursor-pointer" data-cn="${cn}" data-loc="${loc}" value="${batch}">
-                                <span class="font-bold text-gray-800 cursor-pointer select-none hover:text-blue-600 transition" onclick="document.getElementById('export_batch_items_${globalBatchIdx}').classList.toggle('hidden')">${batch} <span class="text-xs text-blue-500 font-normal ml-2 bg-blue-50 px-1 rounded border border-blue-100">展开明细</span></span>
+                                <span class="font-bold text-gray-800 cursor-pointer select-none hover:text-blue-600 transition" onclick="document.getElementById('export_batch_items_${globalBatchIdx}').classList.toggle('hidden')">${escapeHtml(batch)} <span class="text-xs text-blue-500 font-normal ml-2 bg-blue-50 px-1 rounded border border-blue-100">展开明细</span></span>
                             </div>
                             <div id="export_batch_items_${globalBatchIdx}" class="hidden ml-5 space-y-1.5 mt-2 bg-gray-50 p-2 rounded border border-gray-100">`;
                         items.forEach(item => {
                             let itemStr = `${item.batch}-${item.category}-${item.character}-${item.count}`;
                             html += `
                                 <label class="flex items-start gap-2 text-gray-600 text-xs cursor-pointer hover:bg-white p-1 rounded transition">
-                                    <input type="checkbox" class="export-item-cb w-3.5 h-3.5 mt-0.5" data-cn="${cn}" data-loc="${loc}" data-batch="${batch}" value="${itemStr}">
-                                    <span class="leading-tight">${itemStr}</span>
+                                    <input type="checkbox" class="export-item-cb w-3.5 h-3.5 mt-0.5" data-cn="${cn}" data-loc="${loc}" data-batch="${batch}" value="${escapeHtml(itemStr)}">
+                                    <span class="leading-tight">${escapeHtml(itemStr)}</span>
                                 </label>`;
                         });
                         html += `</div></div>`;
@@ -388,15 +388,15 @@
 
             let html = '';
             for(let cn in previewData) {
-                html += `<div class="export-preview-cn-block mb-6" data-cn="${cn}">
-                            <div class="font-bold text-[15px] border-b border-gray-300 mb-2 pb-1 text-black">cn:${cn}</div>`;
+                html += `<div class="export-preview-cn-block mb-6" data-cn="${escapeHtml(cn)}">
+                            <div class="font-bold text-[15px] border-b border-gray-300 mb-2 pb-1 text-black">cn:${escapeHtml(cn)}</div>`;
                 for(let loc in previewData[cn]) {
-                    html += `<div class="export-preview-loc-block ml-1 mb-4" data-loc="${loc}">
-                                <div class="text-[13px] font-bold text-gray-800 mb-2">囤货地:${loc}</div>
+                    html += `<div class="export-preview-loc-block ml-1 mb-4" data-loc="${escapeHtml(loc)}">
+                                <div class="text-[13px] font-bold text-gray-800 mb-2">囤货地:${escapeHtml(loc)}</div>
                                 <ul class="export-sortable-list space-y-1.5 ml-1 border-l-[3px] border-gray-200 pl-2 min-h-[30px]">`;
                     previewData[cn][loc].forEach(row => {
                         html += `<li class="p-2 bg-gray-50 border border-gray-200 rounded text-[13px] text-black cursor-move flex items-start gap-2 hover:bg-gray-100 shadow-sm transition-colors" draggable="true" ondragstart="exportDragStart(event)" ondragover="exportDragOver(event)" ondrop="exportDrop(event)" ondragend="exportDragEnd(event)">
-                                    <span class="text-gray-400 mt-0.5 select-none drag-handle">☰</span> <span class="export-row-text break-all">${row.text}</span>
+                                    <span class="text-gray-400 mt-0.5 select-none drag-handle">☰</span> <span class="export-row-text break-all">${escapeHtml(row.text)}</span>
                                  </li>`;
                     });
                     html += `</ul></div>`;

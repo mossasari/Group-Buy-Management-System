@@ -8,7 +8,7 @@
         window.renderPaymentAdmin = function() {
             const batchSelect = document.getElementById('payAdminBatchSelect');
             const batches = [...new Set(groupData.map(i => i.batch))].filter(b => b);
-            if(batchSelect) batchSelect.innerHTML = batches.map(b => `<option value="${b}">${b}</option>`).join('');
+            if(batchSelect) batchSelect.innerHTML = batches.map(b => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join('');
             
             updatePayAdminCodeDisplay();
             let settings = JSON.parse(imageUrlData['__PAYMENT_SETTINGS__'] || '{}');

@@ -57,7 +57,7 @@
             document.getElementById('rankResultArea').classList.remove('hidden');
             document.getElementById('rankResultText').innerHTML = `
                 <div class="text-center text-lg mb-4 text-gray-700 leading-relaxed">
-                    恭喜你，<strong class="text-pink-600 text-2xl">${myData.cn}</strong>！<br>
+                    恭喜你，<strong class="text-pink-600 text-2xl">${escapeHtml(myData.cn)}</strong>！<br>
                     你在本团一共吃了 <strong class="text-blue-500 text-3xl">${myData.count}</strong> 件谷子，<br>
                     目前累计肾额为 <strong class="text-red-500 text-3xl">¥${myData.amount.toFixed(2)}</strong>！
                 </div>
@@ -104,7 +104,7 @@
             // 新增：提取该买家参与过的所有独立团期，并填充到下拉框
             let buyerBatches = [...new Set(myItems.map(i => i.batch))].filter(b => b);
             let filterSelect = document.getElementById('buyerBatchFilter');
-            filterSelect.innerHTML = '<option value="all">全部团期</option>' + buyerBatches.map(b => `<option value="${b}">${b}</option>`).join('');
+            filterSelect.innerHTML = '<option value="all">全部团期</option>' + buyerBatches.map(b => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join('');
 
             window.renderBuyerSearchPage(0);
         }
@@ -131,7 +131,7 @@
             let cnInput = document.getElementById('queryCnInput').value.trim().toLowerCase();
             let matchedNames = Object.keys(groupedData); 
             let nameStr = matchedNames.length > 1 ? `包含 "${cnInput}" 的匹配项` : (matchedNames[0] || cnInput); 
-            document.getElementById('buyerSummary').innerHTML = `搜索结果：${nameStr} <br>当前展示数量：<strong class="text-blue-500">${totalCount}</strong> 件`; 
+            document.getElementById('buyerSummary').innerHTML = `搜索结果：${escapeHtml(nameStr)} <br>当前展示数量：<strong class="text-blue-500">${totalCount}</strong> 件`;
             
             // 4. 处理分页
             let pageSize = 10; 
@@ -167,7 +167,7 @@
                 let groupDiv = document.createElement('div'); 
                 groupDiv.className = "mb-6 bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm fade-in"; 
                 
-                groupDiv.innerHTML = `<div class="bg-blue-50 p-4 border-b border-blue-100 flex flex-col gap-2"><div class="flex justify-between items-center"><span class="text-blue-700 font-bold text-lg">CN: ${buyerCn}</span> <span class="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">共 ${cnGlobal.count} 件 (展示中)</span></div><div class="grid grid-cols-3 gap-2 text-center text-xs mt-2 bg-white p-2 rounded border border-blue-100"><div><span class="block text-gray-500">应付总额</span><span class="font-bold text-gray-800">¥${cnGlobal.total.toFixed(2)}</span></div><div class="border-l"><span class="block text-gray-500">已交款</span><span class="font-bold text-green-600">¥${cnGlobal.paid.toFixed(2)}</span></div><div class="border-l"><span class="block text-gray-500">未交款</span><span class="font-bold ${cnGlobal.unpaid > 0 ? 'text-red-500' : 'text-gray-400'}">¥${cnGlobal.unpaid.toFixed(2)}</span></div></div></div>`; 
+                groupDiv.innerHTML = `<div class="bg-blue-50 p-4 border-b border-blue-100 flex flex-col gap-2"><div class="flex justify-between items-center"><span class="text-blue-700 font-bold text-lg">CN: ${escapeHtml(buyerCn)}</span> <span class="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">共 ${cnGlobal.count} 件 (展示中)</span></div><div class="grid grid-cols-3 gap-2 text-center text-xs mt-2 bg-white p-2 rounded border border-blue-100"><div><span class="block text-gray-500">应付总额</span><span class="font-bold text-gray-800">¥${cnGlobal.total.toFixed(2)}</span></div><div class="border-l"><span class="block text-gray-500">已交款</span><span class="font-bold text-green-600">¥${cnGlobal.paid.toFixed(2)}</span></div><div class="border-l"><span class="block text-gray-500">未交款</span><span class="font-bold ${cnGlobal.unpaid > 0 ? 'text-red-500' : 'text-gray-400'}">¥${cnGlobal.unpaid.toFixed(2)}</span></div></div></div>`;
 
                 let itemsContainer = document.createElement('div'); 
                 itemsContainer.className = "p-3 space-y-4 bg-gray-50"; 
@@ -177,13 +177,13 @@
 
                 for (let batchName in batchGroups) {
                     let batchDiv = document.createElement('div'); batchDiv.className = "space-y-2";
-                    batchDiv.innerHTML = `<div class="text-sm font-bold text-gray-700 border-l-4 border-blue-400 pl-2 bg-white rounded shadow-sm py-1.5 px-2">${batchName}</div>`;
+                    batchDiv.innerHTML = `<div class="text-sm font-bold text-gray-700 border-l-4 border-blue-400 pl-2 bg-white rounded shadow-sm py-1.5 px-2">${escapeHtml(batchName)}</div>`;
                     batchGroups[batchName].forEach(item => { 
                         let key = item.batch + '|' + item.category + '|' + item.character; 
                         let imgSrc = window.currentBuyerSearchImgData[key];
                         let imgHTML = imgSrc ? `<img src="${imgSrc}" class="w-20 h-20 md:w-24 md:h-24 object-cover rounded border border-gray-200 flex-shrink-0 bg-white">` : `<div class="w-20 h-20 bg-gray-100 rounded border border-dashed border-gray-300 flex items-center justify-center text-xs text-gray-400 flex-shrink-0">无图</div>`;
                         let card = document.createElement('div'); card.className = "border border-gray-100 bg-white rounded p-3 text-sm flex gap-3 shadow-sm"; 
-                        card.innerHTML = `${imgHTML}<div class="flex-1 flex flex-col justify-center min-w-0"><div class="text-xs text-gray-500 truncate">${item.category}</div><div class="font-bold text-gray-800 text-base truncate mb-1">${item.character}</div><div class="flex justify-between items-center mt-auto"><div class="text-xs"><span class="text-gray-500">¥${item.price} × </span><span class="text-blue-500 font-bold">${item.count}</span></div><div class="flex gap-1"><span class="text-[10px] px-1.5 py-0.5 rounded border ${item.status==='已到货'?'border-blue-200 bg-blue-50 text-blue-600':item.status==='已排发'?'border-purple-200 bg-purple-50 text-purple-600':'border-gray-200 bg-gray-50 text-gray-500'} whitespace-nowrap">${item.status||'未到货'}</span><span class="text-[10px] px-1.5 py-0.5 rounded border ${item.paidStatus==='已交'?'border-green-200 bg-green-50 text-green-600':'border-red-200 bg-red-50 text-red-500'} whitespace-nowrap">${item.paidStatus||'未交'}</span></div></div></div>`; 
+                        card.innerHTML = `${imgHTML}<div class="flex-1 flex flex-col justify-center min-w-0"><div class="text-xs text-gray-500 truncate">${escapeHtml(item.category)}</div><div class="font-bold text-gray-800 text-base truncate mb-1">${escapeHtml(item.character)}</div><div class="flex justify-between items-center mt-auto"><div class="text-xs"><span class="text-gray-500">¥${item.price} × </span><span class="text-blue-500 font-bold">${item.count}</span></div><div class="flex gap-1"><span class="text-[10px] px-1.5 py-0.5 rounded border ${item.status==='已到货'?'border-blue-200 bg-blue-50 text-blue-600':item.status==='已排发'?'border-purple-200 bg-purple-50 text-purple-600':'border-gray-200 bg-gray-50 text-gray-500'} whitespace-nowrap">${escapeHtml(item.status||'未到货')}</span><span class="text-[10px] px-1.5 py-0.5 rounded border ${item.paidStatus==='已交'?'border-green-200 bg-green-50 text-green-600':'border-red-200 bg-red-50 text-red-500'} whitespace-nowrap">${escapeHtml(item.paidStatus||'未交')}</span></div></div></div>`;
                         batchDiv.appendChild(card); 
                     });
                     itemsContainer.appendChild(batchDiv);
@@ -245,7 +245,7 @@
             if(myReqs.length === 0) { list.innerHTML = '<p class="text-sm text-gray-400 text-center">暂无交肾记录</p>'; return; }
             myReqs.slice().reverse().forEach(req => {
                 let badge = req.status==='审核通过'?'bg-green-500':req.status==='被驳回'?'bg-red-500':'bg-yellow-500';
-                list.innerHTML += `<div class="bg-white border border-gray-200 rounded p-3 text-sm shadow-sm relative"><div class="flex justify-between items-center mb-2"><span class="text-gray-500 text-xs font-bold">${new Date(req.time).toLocaleString()}</span><span class="text-white px-2 py-0.5 rounded text-xs font-bold ${badge}">${req.status}</span></div><div class="text-gray-700 font-bold mb-1">团期：${req.batch} (共 ${req.items.length} 项)</div><div class="text-red-500 font-bold">交肾金额：¥${req.amount.toFixed(2)}</div>${req.status === '被驳回' ? `<div class="mt-2 text-xs text-red-600 bg-red-50 p-1 rounded border border-red-200">驳回原因: ${req.remark||'无'}</div>` : ''}</div>`;
+                list.innerHTML += `<div class="bg-white border border-gray-200 rounded p-3 text-sm shadow-sm relative"><div class="flex justify-between items-center mb-2"><span class="text-gray-500 text-xs font-bold">${new Date(req.time).toLocaleString()}</span><span class="text-white px-2 py-0.5 rounded text-xs font-bold ${badge}">${escapeHtml(req.status)}</span></div><div class="text-gray-700 font-bold mb-1">团期：${escapeHtml(req.batch)} (共 ${req.items.length} 项)</div><div class="text-red-500 font-bold">交肾金额：¥${req.amount.toFixed(2)}</div>${req.status === '被驳回' ? `<div class="mt-2 text-xs text-red-600 bg-red-50 p-1 rounded border border-red-200">驳回原因: ${escapeHtml(req.remark||'无')}</div>` : ''}</div>`;
             });
         }
 
@@ -256,8 +256,8 @@
             currentPayData.items.forEach(item => { if(!batchGroups[item.batch]) batchGroups[item.batch] = { items: [], total: 0 }; batchGroups[item.batch].items.push(item); batchGroups[item.batch].total += item.price * item.count; });
             for(let batch in batchGroups) {
                 let bData = batchGroups[batch]; let itemIds = bData.items.map(i => i.id).join(',');
-                let batchHtml = `<div class="mb-5 bg-white rounded border border-yellow-200 overflow-hidden shadow-sm"><div class="bg-yellow-50 text-yellow-800 font-bold px-3 py-3 text-sm flex justify-between items-center border-b border-yellow-200"><span>🏷️ 团期：${batch}</span><span class="text-red-600 text-lg">¥${bData.total.toFixed(2)}</span></div><div class="p-3 space-y-2 bg-gray-50">`;
-                bData.items.forEach(item => { batchHtml += `<div class="flex justify-between items-center text-sm border-b border-gray-100 pb-1"><span class="text-gray-600 truncate flex-1">${item.category} - ${item.character} x${item.count}</span><span class="text-gray-800 font-bold ml-2">¥${(item.price * item.count).toFixed(2)}</span></div>`; });
+                let batchHtml = `<div class="mb-5 bg-white rounded border border-yellow-200 overflow-hidden shadow-sm"><div class="bg-yellow-50 text-yellow-800 font-bold px-3 py-3 text-sm flex justify-between items-center border-b border-yellow-200"><span>🏷️ 团期：${escapeHtml(batch)}</span><span class="text-red-600 text-lg">¥${bData.total.toFixed(2)}</span></div><div class="p-3 space-y-2 bg-gray-50">`;
+                bData.items.forEach(item => { batchHtml += `<div class="flex justify-between items-center text-sm border-b border-gray-100 pb-1"><span class="text-gray-600 truncate flex-1">${escapeHtml(item.category)} - ${escapeHtml(item.character)} x${item.count}</span><span class="text-gray-800 font-bold ml-2">¥${(item.price * item.count).toFixed(2)}</span></div>`; });
                 batchHtml += `</div><div class="p-3 bg-white"><button onclick="openPayForm('${batch}', ${bData.total}, '${itemIds}')" class="w-full bg-yellow-500 text-white font-bold py-2 rounded hover:bg-yellow-600 transition shadow">📝 去交肾</button></div></div>`;
                 list.innerHTML += batchHtml;
             }
@@ -379,26 +379,26 @@
             
             let itemsHtml = req.items.map(id => {
                 let item = currentShipData.allItems.find(i => i.id === id);
-                return item ? `<li>[${item.batch}] ${item.category} - ${item.character} <strong class="text-blue-500 ml-1">x${item.count}</strong></li>` : `<li class="text-red-400">未知/已删除商品</li>`;
+                return item ? `<li>[${escapeHtml(item.batch)}] ${escapeHtml(item.category)} - ${escapeHtml(item.character)} <strong class="text-blue-500 ml-1">x${item.count}</strong></li>` : `<li class="text-red-400">未知/已删除商品</li>`;
             }).join('');
 
             let badge = req.status==='已排发'?'text-green-600':req.status==='需补邮'?'text-red-500':'text-yellow-600';
-            
+
             let fStatus = req.buyerFeedbackStatus || '未查看';
             let fRemark = req.buyerFeedbackRemark || '';
-            
+
             document.getElementById('shipDetailContent').innerHTML = `
                 <div class="border-b pb-2 mb-2">
                     <p><span class="font-bold">申请时间：</span>${new Date(req.time).toLocaleString()}</p>
-                    <p><span class="font-bold">当前状态：</span><span class="${badge} font-bold">${req.status}</span></p>
+                    <p><span class="font-bold">当前状态：</span><span class="${badge} font-bold">${escapeHtml(req.status)}</span></p>
                 </div>
                 <div class="border-b pb-2 mb-2 bg-gray-50 p-2 rounded">
-                    <p class="mb-1"><span class="font-bold text-green-700">📦 快递单号：</span><span class="font-mono text-base ml-1 select-all">${req.trackingNo || '暂无'}</span></p>
-                    <p><span class="font-bold text-red-500">💬 团长回复：</span>${req.remark || '暂无'}</p>
+                    <p class="mb-1"><span class="font-bold text-green-700">📦 快递单号：</span><span class="font-mono text-base ml-1 select-all">${escapeHtml(req.trackingNo || '暂无')}</span></p>
+                    <p><span class="font-bold text-red-500">💬 团长回复：</span>${escapeHtml(req.remark || '暂无')}</p>
                 </div>
                 <div class="border-b pb-2 mb-2">
-                    <p><span class="font-bold">收件地址：</span>${req.address}</p>
-                    <p><span class="font-bold">快递要求：</span>${req.express || '无'} <span class="ml-2 font-bold text-gray-500">(付邮：${req.isPaid})</span></p>
+                    <p><span class="font-bold">收件地址：</span>${escapeHtml(req.address)}</p>
+                    <p><span class="font-bold">快递要求：</span>${escapeHtml(req.express || '无')} <span class="ml-2 font-bold text-gray-500">(付邮：${escapeHtml(req.isPaid)})</span></p>
                 </div>
                 ${req.proofImg ? `
                 <div class="border-b pb-2 mb-2">
@@ -487,32 +487,32 @@
             for(let loc in locGroups) {
                 let locHtml = `<div class="mb-5 bg-gray-50 rounded border border-gray-200 overflow-hidden shadow-sm">
                     <div class="bg-blue-100 text-blue-800 font-bold px-3 py-2 text-sm flex justify-between items-center">
-                        <span>🏠 囤货地：${loc}</span>
-                        <button onclick="toggleSelectLoc('${loc}')" class="text-xs bg-white text-blue-600 px-2 py-1 rounded shadow-sm border border-blue-200 hover:bg-blue-50 transition">本仓全选</button>
+                        <span>🏠 囤货地：${escapeHtml(loc)}</span>
+                        <button onclick="toggleSelectLoc('${escapeHtml(loc)}')" class="text-xs bg-white text-blue-600 px-2 py-1 rounded shadow-sm border border-blue-200 hover:bg-blue-50 transition">本仓全选</button>
                     </div>
                     <div class="p-2 space-y-2">`;
-                
+
                 locGroups[loc].forEach(item => {
-                    let key = `${item.batch}|${item.category}|${item.character}`; 
+                    let key = `${item.batch}|${item.category}|${item.character}`;
                     let imgSrc = currentShipData.imgData[key];
                     let imgHTML = imgSrc ? `<img src="${imgSrc}" class="w-16 h-16 object-cover rounded border bg-white flex-shrink-0">` : `<div class="w-16 h-16 bg-gray-100 rounded border border-dashed flex items-center justify-center text-xs text-gray-400 flex-shrink-0">无图</div>`;
-                    
+
                     let cnTag = '';
                     if(item.cn.toLowerCase() !== currentShipBuyerCn) {
-                        cnTag = `<div class="mt-1"><span class="inline-block text-[10px] bg-blue-50 text-blue-600 border border-blue-200 px-1.5 py-0.5 rounded break-all leading-tight">🏷️ 实际CN: ${item.cn}</span></div>`;
+                        cnTag = `<div class="mt-1"><span class="inline-block text-[10px] bg-blue-50 text-blue-600 border border-blue-200 px-1.5 py-0.5 rounded break-all leading-tight">🏷️ 实际CN: ${escapeHtml(item.cn)}</span></div>`;
                     }
-                    
+
                     let isChecked = window.currentShipSelectedIds.has(item.id) ? 'checked' : '';
 
                     locHtml += `<label class="flex items-center gap-2 p-2 bg-white border border-gray-200 rounded cursor-pointer hover:bg-green-50 transition">
-                        <input type="checkbox" class="ship-item-cb w-5 h-5 text-green-500 border-gray-300 rounded flex-shrink-0" value="${item.id}" data-loc="${loc}" onchange="updateShipSelection(this)" ${isChecked}>
+                        <input type="checkbox" class="ship-item-cb w-5 h-5 text-green-500 border-gray-300 rounded flex-shrink-0" value="${item.id}" data-loc="${escapeHtml(loc)}" onchange="updateShipSelection(this)" ${isChecked}>
                         ${imgHTML}
                         <div class="flex-1 min-w-0 flex flex-col justify-center gap-0.5 pointer-events-none">
                             <div class="text-xs text-gray-500 leading-tight">
-                                <span class="inline-block bg-gray-100 px-1 rounded text-[10px] text-gray-700 border border-gray-200">${item.batch}</span> 
-                                <span class="break-words">${item.category}</span>
+                                <span class="inline-block bg-gray-100 px-1 rounded text-[10px] text-gray-700 border border-gray-200">${escapeHtml(item.batch)}</span>
+                                <span class="break-words">${escapeHtml(item.category)}</span>
                             </div>
-                            <div class="font-bold text-gray-800 leading-tight break-words text-sm md:text-base">${item.character}</div>
+                            <div class="font-bold text-gray-800 leading-tight break-words text-sm md:text-base">${escapeHtml(item.character)}</div>
                             ${cnTag}
                         </div>
                         <div class="text-green-600 font-bold text-base md:text-lg px-1 text-right whitespace-nowrap pointer-events-none">x${item.count}</div>
@@ -555,7 +555,7 @@
             let settings = currentShipData.locSettings || {}; 
             let locConf = settings[loc] || {};
             
-            let postageText = locConf.cost ? `📦 [${loc}] 邮费说明：${locConf.cost}` : `⚠️ [${loc}] 未设置明确邮费，请看群公告`;
+            let postageText = locConf.cost ? `📦 [${escapeHtml(loc)}] 邮费说明：${escapeHtml(locConf.cost)}` : `⚠️ [${escapeHtml(loc)}] 未设置明确邮费，请看群公告`;
             let imgHtml = locConf.url ? `<img src="${locConf.url}" class="w-40 h-40 mx-auto object-contain border rounded shadow-sm mt-2">` : '<div class="text-gray-400 mt-2 text-xs">团长未在此囤货地上传收款码，可先选"否"提交</div>';
             
             document.getElementById('postageNoticeText').innerText = postageText;

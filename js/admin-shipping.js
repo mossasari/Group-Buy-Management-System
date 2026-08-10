@@ -3,8 +3,8 @@
             const datalist = document.getElementById('locationOptions');
             const batches = [...new Set(groupData.map(i => i.batch))].filter(b => b);
             const locs = [...new Set(groupData.map(i => i.location))].filter(l => l);
-            if(batchSelect) batchSelect.innerHTML = batches.map(b => `<option value="${b}">${b}</option>`).join('');
-            if(datalist) datalist.innerHTML = locs.map(l => `<option value="${l}">`).join('');
+            if(batchSelect) batchSelect.innerHTML = batches.map(b => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join('');
+            if(datalist) datalist.innerHTML = locs.map(l => `<option value="${escapeHtml(l)}">`).join('');
             
             updateCurrentLocationDisplay();
 
@@ -218,7 +218,7 @@
                 let url = settings[loc]?.url || '';
                 html += `
                 <div class="border border-purple-200 p-3 rounded bg-white shadow-sm">
-                    <h4 class="font-bold text-purple-700 mb-2">🏠 ${loc}</h4>
+                    <h4 class="font-bold text-purple-700 mb-2">🏠 ${escapeHtml(loc)}</h4>
                     <div class="flex flex-col gap-2">
                         <div><label class="text-xs text-gray-500">邮费说明 (例如: 默认10元,偏远15元)</label><input type="text" id="loc_cost_${loc}" value="${cost}" class="w-full border border-gray-300 focus:border-purple-500 rounded px-2 py-1 text-sm"></div>
                         <div><label class="text-xs text-gray-500">收款码直链 (例如: https://xxx.com/a.jpg)</label><input type="text" id="loc_url_${loc}" value="${url}" class="w-full border border-gray-300 focus:border-purple-500 rounded px-2 py-1 text-sm"></div>
@@ -250,7 +250,7 @@
             if(batches.length === 0) return alert('没有其他历史团期可供复用！');
             
             const select = document.getElementById('reuseSourceBatch');
-            select.innerHTML = batches.map(b => `<option value="${b}">${b}</option>`).join('');
+            select.innerHTML = batches.map(b => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join('');
             
             document.getElementById('reuseImageModal').classList.remove('hidden');
         };
