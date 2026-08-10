@@ -91,3 +91,9 @@
                 } else { await db.from('leader_data').insert({ user_id: currentUser.id, group_data: [], image_data: {} }); }
             } catch(e) {} finally { hideLoading(); showScreen('dashboard-screen'); updateBatchDatalist(); switchTab('input'); }
         }
+
+        // 页面启动时检查是否已登录（放在 auth.js 末尾，确保 initCloudData 已定义）
+        db.auth.getSession().then(({ data: { session } }) => {
+            if (session) { currentUser = session.user; initCloudData(); }
+            else showScreen('portal-screen');
+        });

@@ -17,11 +17,6 @@
             finally { hideLoading(); }
         }
 
-        db.auth.getSession().then(({ data: { session } }) => {
-            if (session) { currentUser = session.user; initCloudData(); }
-            else showScreen('portal-screen');
-        });
-
         let saveTimeout = null;
         async function syncToCloud() {
             if(!currentUser) return;
