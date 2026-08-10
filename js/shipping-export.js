@@ -1,7 +1,7 @@
         let shipExportTreeData = {};
         
         window.openShipExportModal = function() {
-            if(window.currentShipSelectedIds.size === 0) return alert('请先勾选需要导出的谷子哦！');
+            if(window.currentShipSelectedIds.size === 0) { showToast('请先勾选需要导出的谷子哦！', 'warning'); return; }
             
             shipExportTreeData = {};
             window.currentShipSelectedIds.forEach(id => {
@@ -90,7 +90,7 @@
                 }
             });
             
-            if(exportFinalList.length === 0) return alert('请至少勾选一项要导出的内容！');
+            if(exportFinalList.length === 0) { showToast('请至少勾选一项要导出的内容！', 'warning'); return; }
             
             let sampleItem = currentShipData.items.find(i => window.currentShipSelectedIds.has(i.id));
             let locationName = sampleItem ? (sampleItem.location || '默认仓库') : '默认仓库';
@@ -257,7 +257,7 @@
             document.execCommand('copy');
             document.body.removeChild(tempInput);
             
-            alert('✅ 纯文本已复制到剪贴板！');
+            showToast("纯文本已复制到剪贴板！", 'success');
         };
 
         window.shipExportToImage = function() {
@@ -277,263 +277,11 @@
                 element.querySelectorAll('.cursor-grab').forEach(el => el.classList.remove('hidden'));
                 btn.innerHTML = originalText;
             }).catch(err => { 
-                alert('截图失败'); 
+                showToast("截图失败", 'error'); 
                 element.querySelectorAll('.cursor-grab').forEach(el => el.classList.remove('hidden'));
                 btn.innerHTML = originalText; 
             });
         };
-            if (!currentShipData.items || currentShipData.items.length === 0) {
-                return alert('当前没有可排发的数据！');
-            }
-            
-            let treeContainer = document.getElementById('shipExportTree');
-            treeContainer.innerHTML = '';
-            
-            // 数据按照 实际CN -> 囤货地 -> 团期 分组
-            let exportData = {};
-            currentShipData.items.forEach(item => {
-                let actualCn = item.cn || '未知';
-                let loc = item.location || '默认未分配仓库';
-                let batch = item.batch || '未知团期';
-
-                if (!exportData[actualCn]) exportData[actualCn] = {};
-                if (!exportData[actualCn][loc]) exportData[actualCn][loc] = {};
-                if (!exportData[actualCn][loc][batch]) exportData[actualCn][loc][batch] = [];
-
-                exportData[actualCn][loc][batch].push(item);
-            });
-
-            // 渲染勾选结构
-            let html = '';
-            let globalBatchIdx = 0;
-            for (let cn in exportData) {
-                html += `<div class="mb-4 border border-blue-200 rounded p-3 bg-white shadow-sm">
-                            <div class="font-bold text-lg text-blue-800 border-b border-blue-100 pb-1 mb-2">cn: ${escapeHtml(cn)}</div>`;
-                for (let loc in exportData[cn]) {
-                    html += `<div class="ml-2 mb-3">
-                                <div class="font-bold text-gray-700 text-sm mb-2 bg-gray-100 inline-block px-2 py-0.5 rounded border border-gray-200">囤货地: ${escapeHtml(loc)}</div>`;
-                    for (let batch in exportData[cn][loc]) {
-                        globalBatchIdx++;
-                        let items = exportData[cn][loc][batch];
-                        html += `
-                        <div class="ml-3 mt-1 border-l-2 border-gray-200 pl-3 pb-2">
-                            <div class="flex items-center gap-2 mb-1">
-                                <input type="checkbox" class="export-batch-cb w-4 h-4 cursor-pointer" data-cn="${cn}" data-loc="${loc}" value="${batch}">
-                                <span class="font-bold text-gray-800 cursor-pointer select-none hover:text-blue-600 transition" onclick="document.getElementById('export_batch_items_${globalBatchIdx}').classList.toggle('hidden')">${escapeHtml(batch)} <span class="text-xs text-blue-500 font-normal ml-2 bg-blue-50 px-1 rounded border border-blue-100">展开明细</span></span>
-                            </div>
-                            <div id="export_batch_items_${globalBatchIdx}" class="hidden ml-5 space-y-1.5 mt-2 bg-gray-50 p-2 rounded border border-gray-100">`;
-                        items.forEach(item => {
-                            let itemStr = `${item.batch}-${item.category}-${item.character}-${item.count}`;
-                            html += `
-                                <label class="flex items-start gap-2 text-gray-600 text-xs cursor-pointer hover:bg-white p-1 rounded transition">
-                                    <input type="checkbox" class="export-item-cb w-3.5 h-3.5 mt-0.5" data-cn="${cn}" data-loc="${loc}" data-batch="${batch}" value="${escapeHtml(itemStr)}">
-                                    <span class="leading-tight">${escapeHtml(itemStr)}</span>
-                                </label>`;
-                        });
-                        html += `</div></div>`;
-                    }
-                    html += `</div>`;
-                }
-                html += `</div>`;
-            }
-            treeContainer.innerHTML = html;
-            
-            shipExportGoStep1();
-            document.getElementById('shipExportModal').classList.remove('hidden');
-        };
-
-        window.closeShipExportModal = function() {
-            document.getElementById('shipExportModal').classList.add('hidden');
-        };
-
-        window.shipExportGoStep1 = function() {
-            document.getElementById('shipExportStep1').classList.remove('hidden');
-            document.getElementById('shipExportStep2').classList.add('hidden');
-            document.getElementById('shipExportNextBtn').classList.remove('hidden');
-            document.getElementById('shipExportBackBtn').classList.add('hidden');
-            document.getElementById('shipExportTextBtn').classList.add('hidden');
-            document.getElementById('shipExportImgBtn').classList.add('hidden');
-        };
-
-        window.shipExportGoStep2 = function() {
-            let previewContainer = document.getElementById('shipExportPreview');
-            previewContainer.innerHTML = '';
-            
-            let batchCbs = document.querySelectorAll('.export-batch-cb:checked');
-            let itemCbs = document.querySelectorAll('.export-item-cb:checked');
-            
-            if(batchCbs.length === 0 && itemCbs.length === 0) {
-                return alert('请至少在列表中勾选一项你要导出的内容！');
-            }
-
-            let previewData = {};
-            
-            batchCbs.forEach(cb => {
-                let cn = cb.getAttribute('data-cn');
-                let loc = cb.getAttribute('data-loc');
-                let batch = cb.value;
-                if(!previewData[cn]) previewData[cn] = {};
-                if(!previewData[cn][loc]) previewData[cn][loc] = [];
-                previewData[cn][loc].push({ type: 'batch', text: batch });
-            });
-
-            itemCbs.forEach(cb => {
-                let cn = cb.getAttribute('data-cn');
-                let loc = cb.getAttribute('data-loc');
-                let itemStr = cb.value;
-                if(!previewData[cn]) previewData[cn] = {};
-                if(!previewData[cn][loc]) previewData[cn][loc] = [];
-                previewData[cn][loc].push({ type: 'item', text: itemStr });
-            });
-
-            let html = '';
-            for(let cn in previewData) {
-                html += `<div class="export-preview-cn-block mb-6" data-cn="${escapeHtml(cn)}">
-                            <div class="font-bold text-[15px] border-b border-gray-300 mb-2 pb-1 text-black">cn:${escapeHtml(cn)}</div>`;
-                for(let loc in previewData[cn]) {
-                    html += `<div class="export-preview-loc-block ml-1 mb-4" data-loc="${escapeHtml(loc)}">
-                                <div class="text-[13px] font-bold text-gray-800 mb-2">囤货地:${escapeHtml(loc)}</div>
-                                <ul class="export-sortable-list space-y-1.5 ml-1 border-l-[3px] border-gray-200 pl-2 min-h-[30px]">`;
-                    previewData[cn][loc].forEach(row => {
-                        html += `<li class="p-2 bg-gray-50 border border-gray-200 rounded text-[13px] text-black cursor-move flex items-start gap-2 hover:bg-gray-100 shadow-sm transition-colors" draggable="true" ondragstart="exportDragStart(event)" ondragover="exportDragOver(event)" ondrop="exportDrop(event)" ondragend="exportDragEnd(event)">
-                                    <span class="text-gray-400 mt-0.5 select-none drag-handle">☰</span> <span class="export-row-text break-all">${escapeHtml(row.text)}</span>
-                                 </li>`;
-                    });
-                    html += `</ul></div>`;
-                }
-                html += `</div>`;
-            }
-
-            previewContainer.innerHTML = html;
-
-            document.getElementById('shipExportStep1').classList.add('hidden');
-            document.getElementById('shipExportStep2').classList.remove('hidden');
-            document.getElementById('shipExportNextBtn').classList.add('hidden');
-            document.getElementById('shipExportBackBtn').classList.remove('hidden');
-            document.getElementById('shipExportTextBtn').classList.remove('hidden');
-            document.getElementById('shipExportImgBtn').classList.remove('hidden');
-        };
-
-        // 导出弹窗内的拖拽排序逻辑
-        let exportDragSrcEl = null;
-        window.exportDragStart = function(e) {
-            exportDragSrcEl = e.currentTarget;
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/plain', e.currentTarget.innerHTML);
-            setTimeout(() => { e.currentTarget.classList.add('opacity-50', 'bg-blue-50'); }, 0);
-        };
-        window.exportDragOver = function(e) {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-            let targetLi = e.target.closest('li');
-            if(targetLi && targetLi !== exportDragSrcEl) {
-                targetLi.classList.add('border-blue-400');
-            }
-            return false;
-        };
-        window.exportDrop = function(e) {
-            e.stopPropagation();
-            let targetLi = e.target.closest('li');
-            if (exportDragSrcEl !== targetLi && targetLi) {
-                let list = targetLi.parentNode;
-                let siblings = Array.from(list.children);
-                let srcIdx = siblings.indexOf(exportDragSrcEl);
-                let targetIdx = siblings.indexOf(targetLi);
-                if(srcIdx < targetIdx) {
-                    list.insertBefore(exportDragSrcEl, targetLi.nextSibling);
-                } else {
-                    list.insertBefore(exportDragSrcEl, targetLi);
-                }
-            }
-            return false;
-        };
-        window.exportDragEnd = function(e) {
-            e.currentTarget.classList.remove('opacity-50', 'bg-blue-50');
-            document.querySelectorAll('.export-sortable-list li').forEach(li => {
-                li.classList.remove('border-blue-400');
-            });
-        };
-
-        window.getExportTextString = function() {
-            let container = document.getElementById('shipExportPreview');
-            let text = '';
-            let cnBlocks = container.querySelectorAll('.export-preview-cn-block');
-            cnBlocks.forEach(cnBlock => {
-                text += `cn:${cnBlock.getAttribute('data-cn')}\n`;
-                let locBlocks = cnBlock.querySelectorAll('.export-preview-loc-block');
-                locBlocks.forEach(locBlock => {
-                    text += `囤货地:${locBlock.getAttribute('data-loc')}\n`;
-                    let items = locBlock.querySelectorAll('.export-row-text');
-                    items.forEach(item => {
-                        text += `${item.innerText.trim()}\n`;
-                    });
-                    text += `\n`; 
-                });
-            });
-            return text.trim();
-        }
-
-        window.shipExportToText = function() {
-            let text = window.getExportTextString();
-            if(!text) return alert("无可导出的内容");
-            
-            if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(text).then(() => {
-                    alert('✅ 纯文字清单已成功复制到剪贴板！');
-                }).catch(err => {
-                    fallbackCopyTextToClipboard(text);
-                });
-            } else {
-                fallbackCopyTextToClipboard(text);
-            }
-        };
-
-        function fallbackCopyTextToClipboard(text) {
-            let textArea = document.createElement("textarea");
-            textArea.value = text;
-            textArea.style.position = "fixed";
-            textArea.style.top = "0";
-            textArea.style.left = "0";
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
-            try {
-                document.execCommand('copy');
-                alert('✅ 纯文字清单已成功复制到剪贴板！');
-            } catch (err) {
-                alert('⚠️ 复制失败，请手动长按文字复制。');
-            }
-            document.body.removeChild(textArea);
-        }
-
-        window.shipExportToImage = function() {
-            let btn = document.getElementById('shipExportImgBtn');
-            let originalText = btn.innerText;
-            btn.innerText = '生成中...';
-            
-            let container = document.getElementById('shipExportPreview');
-            // 截图前隐藏掉拖拽图标，让图片更干净
-            let handles = container.querySelectorAll('.drag-handle');
-            handles.forEach(h => h.style.display = 'none');
-            
-            html2canvas(container, {
-                backgroundColor: '#ffffff',
-                scale: 2,
-                useCORS: true
-            }).then(canvas => {
-                handles.forEach(h => h.style.display = ''); 
-                btn.innerText = originalText;
-                const link = document.createElement('a');
-                link.download = `排发清单_${new Date().getTime()}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-            }).catch(err => {
-                handles.forEach(h => h.style.display = '');
-                btn.innerText = originalText;
-                alert('截图生成失败');
-            });
-        };
-
         window.updateCurrentLocationDisplay = function() {
             let batch = document.getElementById('shipAdminBatchSelect').value;
             let displaySpan = document.getElementById('currentBatchLocation');

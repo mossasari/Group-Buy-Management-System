@@ -2,7 +2,7 @@
             let key = document.getElementById('rankKeyInput').value.trim();
             let myCn = document.getElementById('rankCnInput').value.trim();
             
-            if(!key || !myCn) return alert("密钥和CN不能为空！");
+            if(!key || !myCn) { showToast("密钥和CN不能为空！", 'warning'); return; }
             
             showLoading('正在生成你的吃谷报告...');
             let res = await db.from('leader_data').select('group_data').eq('query_key', key).limit(1);
@@ -13,10 +13,10 @@
             hideLoading();
             
             let data = res.data ? res.data[0] : null;
-            if(!data) return alert("未找到密钥！");
+            if(!data) { showToast("未找到密钥！", 'error'); return; }
             
             let allItems = data.group_data || [];
-            if(allItems.length === 0) return alert("团长还没有录入任何谷子哦！");
+            if(allItems.length === 0) { showToast("团长还没有录入任何谷子哦！", 'info'); return; }
             
             // 聚合所有人的数据
             let userStats = {};
@@ -35,7 +35,7 @@
             
             let myLowerCn = myCn.toLowerCase();
             if(!userStats[myLowerCn]) {
-                return alert("没有找到你的吃谷记录哦！\n(请确保CN严格一致，系统不会计算代排数据)");
+                showToast("没有找到你的吃谷记录哦！(请确保CN严格一致，系统不会计算代排数据)", 'info'); return;
             }
             
             let myData = userStats[myLowerCn];
@@ -79,7 +79,7 @@
         async function doBuyerSearch() {
             let key = document.getElementById('queryKeyInput').value.trim();
             let cn = document.getElementById('queryCnInput').value.trim().toLowerCase();
-            if(!key || !cn) return alert("密钥和CN不能为空！");
+            if(!key || !cn) { showToast("密钥和CN不能为空！", 'warning'); return; }
 
             showLoading('查询中...');
                         let res = await db.from('leader_data').select('group_data, image_data').eq('query_key', key).limit(1);
@@ -91,10 +91,10 @@
             const data = res.data ? res.data[0] : null;
             const error = res.error;
             hideLoading();
-            if(!data) return alert("未找到密钥！");
+            if(!data) { showToast("未找到密钥！", 'error'); return; }
 
             let myItems = data.group_data.filter(item => item.cn.toLowerCase().includes(cn));
-            if(myItems.length === 0) return alert("未查到相关数据。");
+            if(myItems.length === 0) { showToast("未查到相关数据。", 'info'); return; }
 
             window.currentBuyerSearchItems = myItems;
             window.currentBuyerSearchImgData = data.image_data || {};
@@ -212,7 +212,7 @@
             let key = document.getElementById('payKeyInput').value.trim(); 
             currentPayRawCn = document.getElementById('payCnInput').value.trim();
             currentPayBuyerCn = currentPayRawCn.toLowerCase(); 
-            if(!key || !currentPayRawCn) return alert("密钥和CN不能为空！");
+            if(!key || !currentPayRawCn) { showToast("密钥和CN不能为空！", 'warning'); return; }
             showLoading("查询中..."); 
                         let res = await db.from('leader_data').select('user_id, group_data, image_data').eq('query_key', key).limit(1);
             if(res.error || !res.data || res.data.length === 0) {
@@ -222,7 +222,7 @@
             const data = res.data ? res.data[0] : null;
             const error = res.error; 
             hideLoading();
-            if(error || !data) return alert("未找到密钥或团长未设置全局密钥！");
+            if(error || !data) { showToast("未找到密钥或团长未设置全局密钥！", 'error'); return; }
             currentPayKey = key; payUserId = data.user_id; let imgData = data.image_data || {}; 
             currentPayData.imgData = imgData;
             let reqs = JSON.parse(imgData['__PAYMENT_REQS__'] || '[]');
@@ -277,7 +277,7 @@
         window.closePayForm = function() { document.getElementById('payFormModal').classList.add('hidden'); }
 
         window.submitPayment = async function() {
-            if(!window.currentBuyerUploadBase64) return alert("请必须上传交肾付款截图！");
+            if(!window.currentBuyerUploadBase64) { showToast("请必须上传交肾付款截图！", 'warning'); return; }
             let req = { id: generateSafeId(), cn: currentPayRawCn, batch: window.currentPayContext.batch, items: window.currentPayContext.itemIds, amount: window.currentPayContext.total, proofImg: window.currentBuyerUploadBase64, remark: document.getElementById('payRemark').value.trim(), status: '待审核', time: Date.now() };
             showLoading("提交作业中...");
             try {
@@ -285,8 +285,8 @@
                 let imgData = data.image_data || {}; let latestReqs = JSON.parse(imgData['__PAYMENT_REQS__'] || '[]');
                 latestReqs.push(req); imgData['__PAYMENT_REQS__'] = JSON.stringify(latestReqs);
                 const { error } = await db.from('leader_data').update({ image_data: imgData }).eq('user_id', payUserId);
-                if(error) throw error; hideLoading(); closePayForm(); alert("✅ 交肾作业提交成功，等待团长批改！"); doPaymentSearch(); 
-            } catch(e) { hideLoading(); alert("提交失败！"); }
+                if(error) throw error; hideLoading(); closePayForm(); showToast("交肾作业提交成功，等待团长批改！", 'success'); doPaymentSearch(); 
+            } catch(e) { hideLoading(); showToast("提交失败！", 'error'); }
         }
 
         // ================= 排发系统核心逻辑 =================
@@ -300,7 +300,7 @@
             currentShipRawCn = document.getElementById('shipCnInput').value.trim();
             currentShipBuyerCn = currentShipRawCn.toLowerCase(); 
             
-            if(!key || !currentShipRawCn) return alert("密钥和CN不能为空！");
+            if(!key || !currentShipRawCn) { showToast("密钥和CN不能为空！", 'warning'); return; }
             
             showLoading("查询中..."); 
                         let res = await db.from('leader_data').select('user_id, group_data, image_data').eq('query_key', key).limit(1);
@@ -314,7 +314,7 @@
             
             if(error || !data) {
                 console.error("查询错误:", error);
-                return alert("未找到密钥或团长未设置全局密钥！");
+                showToast("未找到密钥或团长未设置全局密钥！", 'error'); return;
             }
             
             currentShipKey = key; shipUserId = data.user_id;
@@ -451,9 +451,9 @@
                     let localTarget = currentShipData.reqs.find(r => r.id === reqId);
                     if(localTarget) { localTarget.buyerFeedbackStatus = status; localTarget.buyerFeedbackRemark = remark; }
                     
-                    hideLoading(); alert("✅ 反馈提交成功！团长那边已经能看到了。");
+                    hideLoading(); showToast("反馈提交成功！团长那边已经能看到了。", 'success');
                 }
-            } catch(e) { hideLoading(); alert("反馈提交失败！请联系团长。"); }
+            } catch(e) { hideLoading(); showToast("反馈提交失败！请联系团长。", 'error'); }
         }
         
         window.updateShipSelection = function(cb) {
@@ -539,7 +539,7 @@
 
         window.openShipForm = function() {
             let selected = Array.from(window.currentShipSelectedIds);
-            if(selected.length === 0) return alert('请先勾选要排发的谷子！');
+            if(selected.length === 0) { showToast('请先勾选要排发的谷子！', 'warning'); return; }
             
             let selectedLocs = new Set();
             selected.forEach(id => {
@@ -548,7 +548,7 @@
             });
             
             if(selectedLocs.size > 1) {
-                return alert('⚠️ 抱歉，不同囤货地（仓库）的商品不能合并发货！\n\n请分多次提交申请，每次只勾选同一个囤货地标签下的商品。');
+                showToast('抱歉，不同囤货地（仓库）的商品不能合并发货！请分多次提交申请，每次只勾选同一个囤货地标签下的商品。', 'warning'); return;
             }
 
             let loc = Array.from(selectedLocs)[0];
@@ -573,7 +573,7 @@
         window.submitShipping = async function() {
             let selected = Array.from(window.currentShipSelectedIds);
             let address = document.getElementById('shipAddress').value.trim();
-            if(!address) return alert("请填写详细的收件地址！");
+            if(!address) { showToast("请填写详细的收件地址！", 'warning'); return; }
             
             let req = { id: generateSafeId(), cn: currentShipRawCn, items: selected, address: address, express: document.getElementById('shipExpress').value.trim(), isPaid: document.getElementById('shipIsPaid').value, status: '处理中', trackingNo: '', remark: '', time: Date.now(), buyerProofImg: window.currentBuyerUploadBase64 };
             
@@ -583,11 +583,11 @@
                 let imgData = data.image_data || {}; let latestReqs = JSON.parse(imgData['__SHIPPING_REQS__'] || '[]');
                 latestReqs.push(req); imgData['__SHIPPING_REQS__'] = JSON.stringify(latestReqs);
                 const { error } = await db.from('leader_data').update({ image_data: imgData }).eq('user_id', shipUserId);
-                if(error) throw error; hideLoading(); closeShipForm(); alert("✅ 提交成功！"); doShippingSearch(); 
-            } catch(e) { hideLoading(); alert("提交失败！请联系团长开放数据库允许匿名修改。"); }
+                if(error) throw error; hideLoading(); closeShipForm(); showToast("提交成功！", 'success'); doShippingSearch(); 
+            } catch(e) { hideLoading(); showToast("提交失败！请联系团长开放数据库允许匿名修改。", 'error'); }
         }
         // ================= 排发清单导出逻辑 =================
-        window.openShipExportModal = function() {
+        // openShipExportModal 定义在 shipping-export.js 中
 
         window.deleteBuyerShipReq = async function(reqId) {
             if(!confirm('确定要撤销并删除这条排发申请吗？\n撤销后你可以重新勾选商品发起申请。')) return;
@@ -604,10 +604,10 @@
                 if(error) throw error;
                 
                 hideLoading();
-                alert("✅ 已成功撤销申请！");
+                showToast("已成功撤销申请！", 'success');
                 doShippingSearch(); 
             } catch(e) {
                 hideLoading();
-                alert("撤销失败！请联系团长。");
+                showToast("撤销失败！请联系团长。", 'error');
             }
         }
