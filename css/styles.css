@@ -1,0 +1,35 @@
+/* 排单管理系统 — 自定义样式 (design by 秋洛) */
+
+.hidden { display: none !important; }
+.tab-active { border-bottom: 2px solid #3b82f6; color: #3b82f6; font-weight: 600; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+@media screen and (max-width: 768px) {
+    body { font-size: 14px; }
+    h1.text-2xl { font-size: 1.25rem; margin-bottom: 1rem; }
+    .p-6 { padding: 1rem; }
+    .mb-6 { margin-bottom: 1rem; }
+    .gap-4 { gap: 0.5rem; }
+}
+
+.export-expand { overflow: visible !important; width: max-content !important; min-width: 100% !important; }
+
+.export-fix, .export-fix * {
+    font-family: "Helvetica Neue", Helvetica, Arial, "Microsoft YaHei", sans-serif !important;
+}
+.export-fix th, .export-fix td {
+    vertical-align: middle !important;
+    line-height: 1.5 !important;
+}
+
+.fade-in { animation: fadeIn 0.3s ease-in-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.drag-over { border-top: 2px solid #3b82f6 !important; background-color: #eff6ff !important; }
+.dragging { opacity: 0.5; }
+.drag-handle { cursor: grab; }
+.drag-handle:active { cursor: grabbing; }
