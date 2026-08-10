@@ -2,7 +2,9 @@
 
  **Design by 秋洛 (QiuLuo)** 
 
-一个专为“二次元吃谷、拼团、代购”量身打造的**轻量级、无服务器 (Serverless) 纯前端排单系统**。
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/mossasari/Group-Buy-Management-System)
+
+一个专为”二次元吃谷、拼团、代购”量身打造的**轻量级、无服务器 (Serverless) 纯前端排单系统**。
 
 告别杂乱无章的 Excel 表格、繁琐的找人补邮、混乱的快递单号。让团长轻松管理，让团员自助查单！
 
@@ -62,6 +64,7 @@
 * **前端框架：** HTML5, Vanilla JavaScript, CSS3
 * **UI 样式：** Tailwind CSS (CDN 引入)
 * **后端 / 数据库 / 鉴权：** Supabase (PostgreSQL, GoTrue)
+* **图片托管：** esaimg.cdn1.vip（内置图床 API，团长上传图片后自动转存）
 * **核心插件：** 
   * `xlsx.full.min.js` (Excel 数据解析)
   * `html2canvas.min.js` (DOM 元素截图导出)
@@ -72,7 +75,7 @@
 
 * [ ] 删掉不必要的功能
       
-* [ ] 涉及上传图片的功能可以直接在网站内上传后直接图床转存
+* [x] 涉及上传图片的功能可以直接在网站内上传后直接图床转存
       
 * [ ] 交肾/排发订单团长会收到提醒
       
@@ -123,17 +126,63 @@ CREATE POLICY "允许公开提交申请" ON leader_data
   FOR UPDATE USING (true) WITH CHECK (true);
 ```
 4. 提取您的 Supabase URL 和 ANON KEY。
-5. 在 index.html 的 <script> 配置区替换常量：
-```
-const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
+5. 在 index.html 的配置区替换常量：
+```js
+const SUPABASE_URL = 'https://your-project.supabase.co';
+const SUPABASE_KEY = 'your-anon-key';
 ```
 6. （可选）在 Supabase 开启 Custom SMTP 以解锁无限制的邮箱注册功能。
-7. 使用任何 Web Server 或静态托管平台 (Vercel, GitHub Pages) 部署该 index.html 即可运行。
+7. 部署整个项目文件夹到任意静态托管平台 (Netlify, Vercel, GitHub Pages) 即可运行。推荐点击上方 Deploy to Netlify 按钮一键部署！
+
+---
+
+## ⚠️ 安全注意事项 (Security)
+
+### Supabase RLS 权限
+
+本项目使用 Supabase 行级安全 (RLS) 策略。SQL 初始化脚本中的 `"允许公开提交申请"` 策略允许**任何人知道 query_key 后修改数据**。这是为了让团员免登录提交申请而做的权衡。
+
+**加固建议（强烈推荐）：**
+1. 在 Supabase 控制台 → Authentication → Settings 中开启邮箱确认
+2. 定期更换 `query_key`
+3. 不要将 Supabase Service Role Key 放入前端代码（ANON_KEY 已足够）
+4. 在 Supabase 控制台开启 RLS 审计日志
+
+### XSS 防护
+
+代码中已内置 `escapeHtml()` 函数防止跨站脚本攻击（XSS）。新增功能时请确保所有用户/云端数据在插入 DOM 前经过转义。
+
+---
+
+## 项目结构
+
+```
+├── index.html              # 主页面（HTML 骨架，~600 行）
+├── css/
+│   └── styles.css          # 自定义样式
+├── js/
+│   ├── core.js             # 基础工具函数 + escapeHtml()
+│   ├── data.js             # 数据层 / 云端同步
+│   ├── auth.js             # 认证模块
+│   ├── image-upload.js     # 图片上传
+│   ├── order-manage.js     # 订单管理
+│   ├── swipe.js            # 滑动多选
+│   ├── dashboard.js        # 团长管理端
+│   ├── buyer-portal.js     # 团员自助端
+│   ├── admin-payment.js    # 交肾审核
+│   ├── shipping-export.js  # 排发导出
+│   └── admin-shipping.js   # 排发审核 / 云端设置
+├── README.md
+├── LICENSE                 # CC BY-NC-SA 4.0
+├── CONTRIBUTING.md         # 贡献指南
+└── netlify.toml            # 部署配置 + 安全头
+```
 
 ---
 
 ## 参与贡献 (Contributing)
+
+详见 [CONTRIBUTING.md](./CONTRIBUTING.md)。
 
 发现 Bug 或者有很棒的新功能想法？
 1. Fork 本仓库
