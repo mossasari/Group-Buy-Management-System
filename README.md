@@ -2,7 +2,7 @@
 
  **Design by 秋洛** 
 
-一个专为吃谷、拼团、代购设计的排单管理系统。基于 HTML+Supabase 构建，数据云端实时同步。
+一个专为吃谷、拼团、代购设计的排单管理系统。基于 HTML+Supabase 构建，数据云端实时同步。请与教程站配合食用。
 
 🌐 **项目教程与演示站：** [qiuluo.netlify.app](https://qiuluo.netlify.app)
 
