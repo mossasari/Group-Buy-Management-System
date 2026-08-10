@@ -21,16 +21,19 @@
 
                     if (remoteUrl) {
                         document.getElementById('imgUrlInput').value = remoteUrl;
-                        alert("✅ 图床上传成功！点击下方的【保存】即可生效。");
+                        showToast("图床上传成功！点击下方的【保存】即可生效。", 'success');
                     } else {
-                        alert("图片上传失败，请重试！");
+                        showToast("图片上传失败，请重试！", 'error');
                     }
                     inputEl.value = ''; 
                 }
             }
         }
 
-        const CUSTOM_IMAGE_API = 'https://esaimg.cdn1.vip/api/v1.php'; 
+        function getImageApiUrl() {
+            const config = JSON.parse(imageUrlData['__IMAGE_HOST_CONFIG__'] || '{}');
+            return config.api || 'https://esaimg.cdn1.vip/api/v1.php';
+        }
 
         function dataURLtoFile(dataurl, filename) {
             let arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
@@ -45,7 +48,7 @@
             formData.append('image', imageFile);
 
             try {
-                const response = await fetch(CUSTOM_IMAGE_API, { method: 'POST', body: formData });
+                const response = await fetch(getImageApiUrl(), { method: 'POST', body: formData });
                 const result = await response.json();
                 
                 let finalUrl = null;
@@ -57,8 +60,6 @@
                 }
                 
                 if (finalUrl) {
-                    // 🌟 核心修改：强制把返回的图床域名替换为 esaimg.cdn1.vip
-                    finalUrl = finalUrl.replace('img.cdn1.vip', 'esaimg.cdn1.vip');
                     return finalUrl;
                 } else {
                     console.error("图床报错:", result);
@@ -97,7 +98,7 @@
                         document.getElementById(previewId).classList.remove('hidden');
                         document.getElementById(previewId).querySelector('img').src = remoteUrl;
                     } else {
-                        alert("图片上传失败，请重试！");
+                        showToast("图片上传失败，请重试！", 'error');
                         inputEl.value = '';
                     }
                 }
@@ -128,7 +129,7 @@
                         updateShipAdminReq(reqId, 'proofImg', remoteUrl);
                     } else {
                         hideLoading();
-                        alert("图床上传失败，请重试！");
+                        showToast("图床上传失败，请重试！", 'error');
                         inputEl.value = '';
                     }
                 }

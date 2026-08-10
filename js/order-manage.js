@@ -70,7 +70,7 @@
         window.toggleSelectAll = function() { document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = document.getElementById('selectAll').checked); };
         function getSelectedIds() { return Array.from(document.querySelectorAll('.row-checkbox:checked')).map(cb => cb.value); }
         
-        window.openBatchEditModal = function() { if(getSelectedIds().length === 0) return alert('请先勾选数据！'); document.getElementById('batchEditModal').classList.remove('hidden'); };
+        window.openBatchEditModal = function() { if(getSelectedIds().length === 0) { showToast('请先勾选数据！', 'warning'); return; } document.getElementById('batchEditModal').classList.remove('hidden'); };
         window.closeBatchEditModal = function() { document.getElementById('batchEditModal').classList.add('hidden'); };
         window.saveBatchEdit = function() {
             const ids = getSelectedIds(), newPaid = document.getElementById('batchEditPaid').value, newStatus = document.getElementById('batchEditStatus').value;
@@ -80,7 +80,7 @@
 
         window.batchDelete = function() {
             const ids = getSelectedIds();
-            if(ids.length === 0) return alert('请先在表格左侧勾选要删除的数据！');
+            if(ids.length === 0) { showToast('请先在表格左侧勾选要删除的数据！', 'warning'); return; }
             if(confirm(`确定要删除选中的 ${ids.length} 条数据吗？`)) { groupData = groupData.filter(i => !ids.includes(i.id)); saveData(); updateSidebar(); renderManageTable(); }
         };
 

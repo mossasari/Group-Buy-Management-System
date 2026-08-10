@@ -124,7 +124,7 @@
                 
                 let existing = reqs.find(r => r.id === reqId);
                 if(!existing) {
-                    hideLoading(); alert("⚠️ 该申请已被团员撤销！");
+                    hideLoading(); showToast("该申请已被团员撤销！", 'warning');
                 } else {
                     reqs = reqs.filter(r => r.id !== reqId);
                     imgData['__SHIPPING_REQS__'] = JSON.stringify(reqs);
@@ -136,13 +136,13 @@
                 saveDataLocalOnly();
                 renderShippingAdmin();
                 hideLoading();
-            } catch(e) { hideLoading(); alert("操作失败，请检查网络！"); }
+            } catch(e) { hideLoading(); showToast("操作失败，请检查网络！", 'error'); }
         }
 
         window.setBatchLocation = function() {
             let batch = document.getElementById('shipAdminBatchSelect').value;
             let location = document.getElementById('shipAdminLocationInput').value.trim();
-            if(!batch || !location) return alert("请正确选择团期，并填写新囤货地！");
+            if(!batch || !location) { showToast("请正确选择团期，并填写新囤货地！", 'warning'); return; }
             
             let updated = 0;
             groupData.forEach(item => {
@@ -151,7 +151,7 @@
             
             if(updated > 0) {
                 saveData();
-                alert(`✅ 成功将团期 [${batch}] 下的 ${updated} 条数据划入囤货地: [${location}] ！\n已经同步到云端。`);
+                showToast(`成功将团期 [${batch}] 下的 ${updated} 条数据划入囤货地: [${location}] ！`, 'success');
                 renderShippingAdmin(); 
             }
         }
@@ -168,7 +168,7 @@
 
                 if(!target) {
                     hideLoading();
-                    alert("⚠️ 更新失败：该申请刚刚已被团员撤销！即将刷新列表。");
+                    showToast("更新失败：该申请刚刚已被团员撤销！", 'warning');
                     imageUrlData['__SHIPPING_REQS__'] = JSON.stringify(reqs);
                     saveDataLocalOnly();
                     renderShippingAdmin();
@@ -204,15 +204,26 @@
                 hideLoading();
             } catch(e) {
                 hideLoading();
-                alert("操作失败，请检查网络！");
+                showToast("操作失败，请检查网络！", 'error');
             }
         }            
 
         window.renderCloudSettings = function() {
             let locs = [...new Set(groupData.map(i => i.location))].filter(l => l);
             let settings = JSON.parse(imageUrlData['__LOCATION_SETTINGS__'] || '{}');
+            let hostConfig = JSON.parse(imageUrlData['__IMAGE_HOST_CONFIG__'] || '{}');
             let html = '';
-            if(locs.length === 0) { html = '<p class="text-sm text-gray-400 text-center mt-4">暂无囤货地数据，请先在排发工作台给谷子设置囤货地。</p>'; }
+
+            // 图床配置
+            html += `
+            <div class="border border-indigo-200 p-3 rounded bg-indigo-50 shadow-sm mb-4">
+                <h4 class="font-bold text-indigo-700 mb-2">🖼️ 图床 API 配置</h4>
+                <div class="flex flex-col gap-2">
+                    <div><label class="text-xs text-gray-500">图床 API 地址 (默认: esaimg.cdn1.vip)</label><input type="text" id="host_api_url" value="${hostConfig.api || ''}" placeholder="https://esaimg.cdn1.vip/api/v1.php" class="w-full border border-gray-300 focus:border-indigo-500 rounded px-2 py-1 text-sm"></div>
+                </div>
+            </div>`;
+
+            if(locs.length === 0) { html += '<p class="text-sm text-gray-400 text-center mt-4">暂无囤货地数据，请先在排发工作台给谷子设置囤货地。</p>'; }
             locs.forEach(loc => {
                 let cost = settings[loc]?.cost || '';
                 let url = settings[loc]?.url || '';
@@ -237,17 +248,19 @@
                     url: document.getElementById(`loc_url_${loc}`).value.trim()
                 };
             });
+            let hostApi = document.getElementById('host_api_url').value.trim();
+            imageUrlData['__IMAGE_HOST_CONFIG__'] = JSON.stringify({ api: hostApi });
             imageUrlData['__LOCATION_SETTINGS__'] = JSON.stringify(settings);
             saveImageUrlData();
-            alert('✅ 囤货地邮费与收款码配置保存成功！');
+            showToast('云端配置保存成功！', 'success');
         }
 
         window.openReuseImageModal = function() {
             const currentBatch = document.getElementById('imageBatchSelect').value;
-            if(!currentBatch) return alert('请先选择当前需要补充柄图的团期！');
+            if(!currentBatch) { showToast('请先选择当前需要补充柄图的团期！', 'warning'); return; }
             
             const batches = [...new Set(groupData.map(i => i.batch))].filter(b => b && b !== currentBatch);
-            if(batches.length === 0) return alert('没有其他历史团期可供复用！');
+            if(batches.length === 0) { showToast('没有其他历史团期可供复用！', 'warning'); return; }
             
             const select = document.getElementById('reuseSourceBatch');
             select.innerHTML = batches.map(b => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join('');
@@ -280,9 +293,9 @@
             if(count > 0) {
                 saveImageUrlData(); 
                 renderImageManager(); 
-                alert("✅ 成功复用了 " + count + " 张同名款式的柄图！");
+                showToast("成功复用了 " + count + " 张同名款式的柄图！", 'success');
             } else {
-                alert('未找到可以复用的柄图。\n(可能是该历史团期没有同名角色，或者当前团期已经有图了)');
+                showToast('未找到可以复用的柄图。(可能是该历史团期没有同名角色，或者当前团期已经有图了)', 'warning');
             }
             closeReuseImageModal();
         };

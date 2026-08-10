@@ -67,16 +67,16 @@
                 }
             });
             saveImageUrlData(); closeBatchImageModal(); renderImageManager();
-            if(updated > 0) alert(`成功导入 ${updated} 个柄图链接！`); else alert("未能识别到任何链接，请检查格式 (角色名,http链接)。");
+            if(updated > 0) showToast("成功导入 ${updated} 个柄图链接！", 'success'); else showToast("未能识别到任何链接，请检查格式 (角色名,http链接)。", 'warning');
         };
 
         document.getElementById('itemForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const batch = document.getElementById('inBatch').value.trim(), category = document.getElementById('inCategory').value.trim(), character = document.getElementById('inCharacter').value.trim(), price = parseFloat(document.getElementById('inPrice').value), multiplier = parseInt(document.getElementById('inMultiplier').value) || 1, names = document.getElementById('inCNs').value.split(/[\r\n]+/).map(n => n.trim()).filter(n => n !== '');
-            if(names.length === 0) return alert('请输入买家CN');
+            if(names.length === 0) { showToast('请输入买家CN', 'warning'); return; }
             let countMap = {}; names.forEach(n => countMap[n] = (countMap[n] || 0) + multiplier);
             for (const cn in countMap) groupData.push({ id: generateSafeId(), batch, category, character, price, count: countMap[cn], cn, status: '未到货', paidStatus: '未交' });
-            saveData(); document.getElementById('inCharacter').value = ''; document.getElementById('inCNs').value = ''; alert('录入成功！');
+            saveData(); document.getElementById('inCharacter').value = ''; document.getElementById('inCNs').value = ''; updateSidebar(); renderManageTable(); showToast("录入成功！", 'success');
         });
 
         window.handleDragStart = function(e, id) { draggedItemRowId = id; e.dataTransfer.effectAllowed = 'move'; e.target.classList.add('dragging'); };
@@ -275,7 +275,7 @@
                     element.classList.remove('export-expand', 'export-fix'); 
                     btn.innerHTML = originalText;
                 }).catch(err => { 
-                    alert('截图失败'); 
+                    showToast("截图失败", 'error'); 
                     scrollContainers.forEach(el => el.classList.remove('export-expand')); 
                     element.classList.remove('export-expand', 'export-fix'); 
                     btn.innerHTML = originalText; 
@@ -298,7 +298,7 @@
         };
         
         window.exportCSV = function() {
-            if(groupData.length===0) return alert('无数据');
+            if(groupData.length===0) { showToast('无数据', 'info'); return; }
             let csv = "\uFEFF唯一ID,团期,分类,角色,单价,数量,买家,到货状态,交肾状态,柄图链接\n";
             groupData.forEach(i => { let key = `${i.batch}|${i.category}|${i.character}`; let imgUrl = imageUrlData[key] || ''; csv += `${i.id},${i.batch},${i.category},${i.character},${i.price},${i.count},${i.cn},${i.status},${i.paidStatus||'未交'},${imgUrl}\n`; });
             const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' })); a.download = "排单云端数据备份.csv"; a.click();
@@ -326,7 +326,7 @@
         }
 
         window.exportCSV = function() {
-            if(groupData.length===0) return alert('无数据');
+            if(groupData.length===0) { showToast('无数据', 'info'); return; }
             let csv = "\uFEFF唯一ID,团期,分类,角色,单价,数量,买家,到货状态,交肾状态,柄图链接\n";
             groupData.forEach(i => { let key = `${i.batch}|${i.category}|${i.character}`; let imgUrl = imageUrlData[key] || ''; csv += `${i.id},${i.batch},${i.category},${i.character},${i.price},${i.count},${i.cn},${i.status},${i.paidStatus||'未交'},${imgUrl}\n`; });
             const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' })); a.download = "排单云端数据备份.csv"; a.click();
@@ -379,7 +379,7 @@
         };
 
         function processImportedData(rows) {
-            if(rows.length < 2) return alert("文件内容为空或格式错误！");
+            if(rows.length < 2) { showToast("文件内容为空或格式错误！", 'warning'); return; }
             
             let isMatrix = false;
             if(rows.length >= 4) {
@@ -464,9 +464,9 @@
                             });
                         }
                     }
-                } catch(err) { 
+                } catch(err) {
                     console.error(err);
-                    return alert("矩阵格式解析失败，请检查表格是否符合要求。"); 
+                    { showToast("矩阵格式解析失败，请检查表格是否符合要求。", 'error'); return; }
                 }
             } else {
                 let headers = rows[0].map(h => String(h).trim());
@@ -523,8 +523,8 @@
                 if (hasNewImage) saveImageUrlData();
                 updateSidebar();
                 renderManageTable();
-                alert(`成功智能识别并导入 ${newRecords.length} 条排单数据！已同步至云端。`);
+                showToast("成功智能识别并导入 ${newRecords.length} 条排单数据！已同步至云端。", 'success');
             } else {
-                alert("未能识别到有效数据，请检查表格内容。");
+                showToast("未能识别到有效数据，请检查表格内容。", 'warning');
             }
         }

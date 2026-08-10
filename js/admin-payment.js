@@ -29,10 +29,10 @@
 
         window.setBatchPayCode = function() {
             let batch = document.getElementById('payAdminBatchSelect').value; let codeUrl = document.getElementById('payAdminCodeInput').value.trim();
-            if(!batch) return alert("请选择团期！");
+            if(!batch) { showToast("请选择团期！", 'warning'); return; }
             let settings = JSON.parse(imageUrlData['__PAYMENT_SETTINGS__'] || '{}'); settings[batch] = codeUrl;
             imageUrlData['__PAYMENT_SETTINGS__'] = JSON.stringify(settings); saveImageUrlData();
-            alert(`✅ 团期 [${batch}] 的专用收款码设置成功！`);
+            showToast(`团期 [${batch}] 的专用收款码设置成功！`, 'success');
         }
 
         window.setDefaultPayCode = function() {
@@ -40,7 +40,7 @@
             let settings = JSON.parse(imageUrlData['__PAYMENT_SETTINGS__'] || '{}');
             settings['__DEFAULT__'] = codeUrl;
             imageUrlData['__PAYMENT_SETTINGS__'] = JSON.stringify(settings); saveImageUrlData();
-            alert(`✅ 全局默认收款码设置成功！`);
+            showToast(`全局默认收款码设置成功！`, 'success');
         }
 
         window.approvePayment = async function(reqId) {
@@ -54,9 +54,9 @@
                     imageUrlData['__PAYMENT_REQS__'] = JSON.stringify(reqs);
                     saveDataLocalOnly(); await syncToCloud(); renderPaymentAdmin();
                     if(document.getElementById('page-manage').classList.contains('hidden') === false) renderManageTable();
-                    hideLoading(); alert("✅ 审批通过，相关谷子已自动更新为【已交】状态！");
+                    hideLoading(); showToast("审批通过，相关谷子已自动更新为【已交】状态！", 'success');
                 }
-            } catch(e) { hideLoading(); alert("审批失败！"); }
+            } catch(e) { hideLoading(); showToast("审批失败！", 'error'); }
         }
 
         window.rejectPayment = async function(reqId) {
@@ -65,7 +65,7 @@
             try {
                 let reqs = JSON.parse(imageUrlData['__PAYMENT_REQS__'] || '[]'); let target = reqs.find(r => r.id === reqId);
                 if(target) { target.status = '被驳回'; target.remark = reason; imageUrlData['__PAYMENT_REQS__'] = JSON.stringify(reqs); saveImageUrlData(); renderPaymentAdmin(); hideLoading(); }
-            } catch(e) { hideLoading(); alert("操作失败！"); }
+            } catch(e) { hideLoading(); showToast("操作失败！", 'error'); }
         }
 
         window.deletePaymentReq = function(reqId) {
