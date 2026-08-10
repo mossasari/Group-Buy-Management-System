@@ -1,4 +1,4 @@
-# 排单管理系统 (Group Buy Management System)
+# 排单管理系统
 
  **Design by 秋洛** 
 
