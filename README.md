@@ -6,9 +6,9 @@
 
 告别杂乱无章的 Excel 表格、繁琐的找人补邮、混乱的快递单号。让团长轻松管理，让团员自助查单！
 
-**图文教程站：** [qiuluo.netlify.app](https://qiuluo.netlify.app)
+🌐**图文教程站：** [qiuluo.netlify.app](https://qiuluo.netlify.app)
 
-**小红书主页：** [特蕾西娅全肯定bot](https://xhslink.cn/m/83wcvC8Rc2i)
+📕**小红书主页：** [特蕾西娅全肯定bot](https://xhslink.cn/m/83wcvC8Rc2i)
 
 ---
 ## 适用范围
