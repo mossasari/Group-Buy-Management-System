@@ -64,6 +64,16 @@
             initCloudData();
         }
 
+        async function saveQueryKey() {
+            let key = document.getElementById('settingQueryKey').value.trim();
+            if(!key) { showToast('请输入密钥！', 'warning'); return; }
+            showLoading('保存密钥...');
+            const { error } = await db.from('leader_data').update({ query_key: key }).eq('user_id', currentUser.id);
+            hideLoading();
+            if(error) showToast('密钥保存失败！', 'error');
+            else showToast('全局密钥设置成功！', 'success');
+        }
+
         async function handleLogout() {
             await db.auth.signOut(); 
             localStorage.removeItem('assistant_uid'); // 清除副团长状态
