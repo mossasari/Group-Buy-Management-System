@@ -24,7 +24,7 @@
 
                 let div = document.createElement('div');
                 div.className = `cursor-pointer p-2 rounded text-sm flex justify-between items-center gap-2 ${currentManageBatch===b?'bg-blue-50 text-blue-600 font-bold border border-blue-100':'text-gray-600 hover:bg-gray-100 border border-transparent'}`;
-                div.innerHTML = `<span class="truncate" title="${b}">${b}</span> ${tagStr ? `<span class="text-[10px] px-1.5 py-0.5 rounded border whitespace-nowrap font-normal ${tagClass}">${tagStr}</span>` : ''}`; 
+                div.innerHTML = `<span class="truncate" title="${escapeHtml(b)}">${escapeHtml(b)}</span> ${tagStr ? `<span class="text-[10px] px-1.5 py-0.5 rounded border whitespace-nowrap font-normal ${tagClass}">${tagStr}</span>` : ''}`;
                 div.onclick = () => selectManageBatch(b);
                 sidebar.appendChild(div);
             });
@@ -56,12 +56,12 @@
                 tr.innerHTML = `
                     <td class="py-2 px-2 text-center text-gray-400 drag-handle" title="按住拖拽排序">☰</td>
                     <td class="py-2 px-2 text-center"><input type="checkbox" class="row-checkbox" value="${item.id}"></td>
-                    <td class="py-2 px-2 max-w-[120px] truncate">${item.category}</td>
-                    <td class="py-2 px-2 max-w-[150px] truncate">${item.character}</td>
-                    <td class="py-2 px-2 text-blue-600 font-bold">${item.cn}</td>
+                    <td class="py-2 px-2 max-w-[120px] truncate">${escapeHtml(item.category)}</td>
+                    <td class="py-2 px-2 max-w-[150px] truncate">${escapeHtml(item.character)}</td>
+                    <td class="py-2 px-2 text-blue-600 font-bold">${escapeHtml(item.cn)}</td>
                     <td class="py-2 px-2 text-gray-500 text-xs">¥${item.price} × ${item.count}</td>
-                    <td class="py-2 px-2">${item.status || '未到货'}</td>
-                    <td class="py-2 px-2"><span class="px-2 py-0.5 rounded text-xs border ${item.paidStatus === '已交'?'text-green-600 bg-green-50':'text-red-500 bg-red-50'}">${item.paidStatus || '未交'}</span></td>
+                    <td class="py-2 px-2">${escapeHtml(item.status || '未到货')}</td>
+                    <td class="py-2 px-2"><span class="px-2 py-0.5 rounded text-xs border ${item.paidStatus === '已交'?'text-green-600 bg-green-50':'text-red-500 bg-red-50'}">${escapeHtml(item.paidStatus || '未交')}</span></td>
                     <td class="py-2 px-2 flex gap-3"><button class="btn-edit text-blue-500 hover:text-blue-700 font-bold text-xs" data-id="${item.id}">编辑</button><button class="btn-delete text-red-400 hover:text-red-600 font-bold text-xs" data-id="${item.id}">删除</button></td>
                 `;
                 tbody.appendChild(tr);
@@ -70,7 +70,7 @@
         window.toggleSelectAll = function() { document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = document.getElementById('selectAll').checked); };
         function getSelectedIds() { return Array.from(document.querySelectorAll('.row-checkbox:checked')).map(cb => cb.value); }
         
-        window.openBatchEditModal = function() { if(getSelectedIds().length === 0) return alert('请先勾选数据！'); document.getElementById('batchEditModal').classList.remove('hidden'); };
+        window.openBatchEditModal = function() { if(getSelectedIds().length === 0) { showToast('请先勾选数据！', 'warning'); return; } document.getElementById('batchEditModal').classList.remove('hidden'); };
         window.closeBatchEditModal = function() { document.getElementById('batchEditModal').classList.add('hidden'); };
         window.saveBatchEdit = function() {
             const ids = getSelectedIds(), newPaid = document.getElementById('batchEditPaid').value, newStatus = document.getElementById('batchEditStatus').value;
@@ -80,7 +80,7 @@
 
         window.batchDelete = function() {
             const ids = getSelectedIds();
-            if(ids.length === 0) return alert('请先在表格左侧勾选要删除的数据！');
+            if(ids.length === 0) { showToast('请先在表格左侧勾选要删除的数据！', 'warning'); return; }
             if(confirm(`确定要删除选中的 ${ids.length} 条数据吗？`)) { groupData = groupData.filter(i => !ids.includes(i.id)); saveData(); updateSidebar(); renderManageTable(); }
         };
 

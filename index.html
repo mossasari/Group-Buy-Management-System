@@ -50,6 +50,10 @@
             <button onclick="showScreen('login-screen')" class="w-full bg-blue-500 text-white font-bold text-lg py-4 rounded-lg shadow hover:bg-blue-600 transition flex items-center justify-center gap-2 mt-4">
                 <span>👑</span> 我是团长 (登录管理后台)
             </button>
+
+            <button onclick="showScreen('about-screen')" class="w-full bg-gray-100 border border-gray-200 text-gray-500 font-bold text-sm py-3 rounded-lg hover:bg-gray-200 transition flex items-center justify-center gap-1 mt-3">
+                <span>ℹ️</span> 关于
+            </button>
         </div>
     </div>
 
@@ -579,8 +583,25 @@
 </div>
 
 
+    <!-- 关于页面 -->
+    <div id="about-screen" class="max-w-md mx-auto pt-16 px-4 hidden fade-in pb-12">
+        <button onclick="showScreen('portal-screen')" class="text-gray-400 mb-6 hover:text-gray-600 block">← 返回首页</button>
+        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 text-center">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">谷圈云端排单管理系统</h2>
+            <p class="text-sm text-gray-500 mb-6">让拼团排单变得简单 ✨</p>
+            <div class="space-y-2 text-sm text-gray-600 text-left bg-gray-50 rounded p-4">
+                <p><strong>版本：</strong>v<span id="aboutVersion"></span></p>
+                <p><strong>原作者：</strong>秋洛</p>
+                <p><strong>许可证：</strong>CC BY-NC-SA 4.0</p>
+                <p><strong>技术栈：</strong>HTML + Tailwind CSS + Vanilla JS + Supabase</p>
+                <p><strong>教程站：</strong><a href="https://mossasari.github.io/groupbuy-tutorial-site/" target="_blank" class="text-blue-500 hover:underline">mossasari.github.io/groupbuy-tutorial-site</a></p>
+            </div>
+        </div>
+    </div>
+
     <!-- ==================== JS 模块（顺序依赖） ==================== -->
     <script src="js/core.js"></script>
+    <script>document.addEventListener('DOMContentLoaded', function() { var el = document.getElementById('aboutVersion'); if(el) el.textContent = APP_VERSION; });</script>
     <script src="js/data.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/image-upload.js"></script>

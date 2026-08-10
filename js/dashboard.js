@@ -18,7 +18,7 @@
         function initImageManager() {
             const batchSelect = document.getElementById('imageBatchSelect');
             const batches = [...new Set(groupData.map(i => i.batch))].filter(b => b);
-            batchSelect.innerHTML = batches.map(b => `<option value="${b}">${b}</option>`).join('');
+            batchSelect.innerHTML = batches.map(b => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join('');
             if(batches.length > 0) renderImageManager(); else document.getElementById('imageContainer').innerHTML = '<p class="text-center py-8">暂无数据</p>';
         }
         window.renderImageManager = function() {
@@ -26,11 +26,11 @@
             container.innerHTML = ''; if(!batch) return;
             let data = groupData.filter(i => i.batch === batch);
             [...new Set(data.map(i => i.category))].filter(c => c).forEach(cat => {
-                let html = `<div class="mb-6"><div class="flex items-center justify-between bg-gray-100 p-2 mb-3 border-l-4 border-blue-500"><h3 class="font-bold text-gray-800">${cat}</h3><button onclick="openBatchImageModal('${batch}', '${cat}')" class="text-xs bg-indigo-100 text-indigo-700 px-3 py-1 rounded hover:bg-indigo-200 font-bold transition shadow-sm">➕ 批量导入链接</button></div><div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-8 gap-4">`;
+                let html = `<div class="mb-6"><div class="flex items-center justify-between bg-gray-100 p-2 mb-3 border-l-4 border-blue-500"><h3 class="font-bold text-gray-800">${escapeHtml(cat)}</h3><button onclick="openBatchImageModal('${escapeHtml(batch)}', '${escapeHtml(cat)}')" class="text-xs bg-indigo-100 text-indigo-700 px-3 py-1 rounded hover:bg-indigo-200 font-bold transition shadow-sm">➕ 批量导入链接</button></div><div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-8 gap-4">`;
                 [...new Set(data.filter(i => i.category === cat).map(i => i.character))].filter(c => c).forEach(char => {
                     let key = `${batch}|${cat}|${char}`; let imgUrl = imageUrlData[key];
                     let imgHtml = imgUrl ? `<img src="${imgUrl}" class="w-full aspect-[4/3] object-cover bg-white rounded shadow-sm border border-gray-200">` : `<div class="w-full aspect-[4/3] bg-gray-50 border border-dashed border-gray-300 rounded flex flex-col items-center justify-center text-gray-400"><span>🔗</span></div>`;
-                    html += `<div class="flex flex-col relative group cursor-pointer" onclick="openImageModal('${key}')">${imgHtml}${imgUrl ? `<button onclick="deleteImage('${key}', event)" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-sm shadow">×</button>` : ''}<div class="text-center text-xs text-gray-700 mt-1 truncate" title="${char}">${char}</div></div>`;
+                    html += `<div class="flex flex-col relative group cursor-pointer" onclick="openImageModal('${key}')">${imgHtml}${imgUrl ? `<button onclick="deleteImage('${key}', event)" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-sm shadow">×</button>` : ''}<div class="text-center text-xs text-gray-700 mt-1 truncate" title="${escapeHtml(char)}">${escapeHtml(char)}</div></div>`;
                 });
                 container.innerHTML += html + `</div></div>`;
             });
@@ -67,16 +67,16 @@
                 }
             });
             saveImageUrlData(); closeBatchImageModal(); renderImageManager();
-            if(updated > 0) alert(`成功导入 ${updated} 个柄图链接！`); else alert("未能识别到任何链接，请检查格式 (角色名,http链接)。");
+            if(updated > 0) showToast("成功导入 ${updated} 个柄图链接！", 'success'); else showToast("未能识别到任何链接，请检查格式 (角色名,http链接)。", 'warning');
         };
 
         document.getElementById('itemForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const batch = document.getElementById('inBatch').value.trim(), category = document.getElementById('inCategory').value.trim(), character = document.getElementById('inCharacter').value.trim(), price = parseFloat(document.getElementById('inPrice').value), multiplier = parseInt(document.getElementById('inMultiplier').value) || 1, names = document.getElementById('inCNs').value.split(/[\r\n]+/).map(n => n.trim()).filter(n => n !== '');
-            if(names.length === 0) return alert('请输入买家CN');
+            if(names.length === 0) { showToast('请输入买家CN', 'warning'); return; }
             let countMap = {}; names.forEach(n => countMap[n] = (countMap[n] || 0) + multiplier);
             for (const cn in countMap) groupData.push({ id: generateSafeId(), batch, category, character, price, count: countMap[cn], cn, status: '未到货', paidStatus: '未交' });
-            saveData(); document.getElementById('inCharacter').value = ''; document.getElementById('inCNs').value = ''; alert('录入成功！');
+            saveData(); document.getElementById('inCharacter').value = ''; document.getElementById('inCNs').value = ''; updateSidebar(); renderManageTable(); showToast("录入成功！", 'success');
         });
 
         window.handleDragStart = function(e, id) { draggedItemRowId = id; e.dataTransfer.effectAllowed = 'move'; e.target.classList.add('dragging'); };
@@ -98,14 +98,14 @@
         function initScheduleFilters() {
             const batchSelect = document.getElementById('scheduleBatch');
             const batches = [...new Set(groupData.map(i => i.batch))].filter(b => b);
-            batchSelect.innerHTML = batches.map(b => `<option value="${b}">${b}</option>`).join('');
+            batchSelect.innerHTML = batches.map(b => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join('');
             if(batches.length > 0) updateScheduleCategory();
         }
         window.updateScheduleCategory = function() {
             const batch = document.getElementById('scheduleBatch').value;
             const categorySelect = document.getElementById('scheduleCategory');
             const categories = [...new Set(groupData.filter(i => i.batch === batch).map(i => i.category))].filter(c => c);
-            categorySelect.innerHTML = '<option value="all">全部种类</option>' + categories.map(c => `<option value="${c}">${c}</option>`).join('');
+            categorySelect.innerHTML = '<option value="all">全部种类</option>' + categories.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
             renderSchedule();
         }
         window.updateCategoryStep = function(category, value) { window.scheduleSteps[category] = parseInt(value); renderSchedule(); }
@@ -144,15 +144,15 @@
                 let html = `
                     <div class="border-2 border-gray-200 shadow rounded p-2 md:p-4 mb-8 bg-white overflow-hidden export-wrapper">
                         <div class="flex justify-between items-center bg-gray-50 p-3 rounded mb-4 shadow-sm border border-gray-100 flex-wrap gap-2">
-                            <h3 class="text-lg font-bold text-gray-800">${batch} - ${cat} 排表</h3>
+                            <h3 class="text-lg font-bold text-gray-800">${escapeHtml(batch)} - ${escapeHtml(cat)} 排表</h3>
                             <div class="flex flex-wrap items-center gap-4">
                                 <div class="flex items-center gap-2">
                                     <label class="text-xs text-gray-500">每排款式数(列数):</label>
-                                    <input type="number" min="1" value="${maxCols}" onchange="updateCategoryCols('${cat}', this.value)" class="w-16 border border-gray-300 rounded px-2 py-1 text-sm bg-yellow-50 text-yellow-700 focus:outline-none focus:border-yellow-400">
+                                    <input type="number" min="1" value="${maxCols}" onchange="updateCategoryCols('${escapeHtml(cat)}', this.value)" class="w-16 border border-gray-300 rounded px-2 py-1 text-sm bg-yellow-50 text-yellow-700 focus:outline-none focus:border-yellow-400">
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <label class="text-xs text-gray-500">每行数量:</label>
-                                    <input type="number" min="1" value="${step}" onchange="updateCategoryStep('${cat}', this.value)" class="w-16 border border-gray-300 rounded px-2 py-1 text-sm bg-blue-50 text-blue-700 focus:outline-none focus:border-blue-400">
+                                    <input type="number" min="1" value="${step}" onchange="updateCategoryStep('${escapeHtml(cat)}', this.value)" class="w-16 border border-gray-300 rounded px-2 py-1 text-sm bg-blue-50 text-blue-700 focus:outline-none focus:border-blue-400">
                                 </div>
                             </div>
                         </div>
@@ -166,7 +166,7 @@
                                 <thead>
                                     <tr class="bg-gray-100">
                                         <th class="border border-gray-300 py-2 w-12 text-gray-600 font-normal">序号</th>
-                                        ${chunk.map(c => `<th class="border border-gray-300 py-2 min-w-[80px]">${c}<br><span class="text-xs text-blue-600 font-normal">¥${charMap[c].price}</span></th>`).join('')}
+                                        ${chunk.map(c => `<th class="border border-gray-300 py-2 min-w-[80px]">${escapeHtml(c)}<br><span class="text-xs text-blue-600 font-normal">¥${charMap[c].price}</span></th>`).join('')}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -176,7 +176,7 @@
                         html += `<tr><td class="border border-gray-300 py-1.5 px-1 bg-gray-50 text-gray-500 font-bold">${indexStr}</td>`;
                         chunk.forEach(c => {
                             let buyer = charMap[c].buyers[r] || '';
-                            html += `<td class="border border-gray-300 py-1.5 px-1 ${buyer ? 'text-gray-700' : 'bg-gray-50'}">${buyer}</td>`;
+                            html += `<td class="border border-gray-300 py-1.5 px-1 ${buyer ? 'text-gray-700' : 'bg-gray-50'}">${escapeHtml(buyer)}</td>`;
                         });
                         html += `</tr>`;
                     }
@@ -190,7 +190,7 @@
         function updateFinanceSelect() {
             const select = document.getElementById('financeBatchSelect');
             select.innerHTML = '<option value="all">全部团期汇总</option>';
-            [...new Set(groupData.map(i => i.batch))].forEach(b => select.innerHTML += `<option value="${b}">${b}</option>`);
+            [...new Set(groupData.map(i => i.batch))].forEach(b => select.innerHTML += `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`);
         }
         
         // 🌟 升级：智能多栏分流肾表渲染逻辑
@@ -235,7 +235,7 @@
                 detailKeys.forEach(d => {
                     detailsHtml += `
                         <div class="text-[11px] text-gray-600 bg-gray-50 hover:bg-blue-50 p-1.5 rounded border border-gray-100 flex items-center justify-between gap-2 transition-colors">
-                            <span class="truncate pr-1 font-medium" title="${d}">• ${d}</span>
+                            <span class="truncate pr-1 font-medium" title="${escapeHtml(d)}">• ${escapeHtml(d)}</span>
                             <strong class="text-blue-500 font-bold whitespace-nowrap text-xs">×${summary[cn].details[d]}</strong>
                         </div>`;
                 });
@@ -244,7 +244,7 @@
                 let tr = document.createElement('tr');
                 tr.className = "hover:bg-gray-50 transition-colors";
                 tr.innerHTML = `
-                    <td class="py-3 px-3 text-gray-800 font-bold border-r border-b align-middle">${cn}</td>
+                    <td class="py-3 px-3 text-gray-800 font-bold border-r border-b align-middle">${escapeHtml(cn)}</td>
                     <td class="py-2 px-2 border-r border-b ${minWidthClass} align-middle">${detailsHtml}</td>
                     <td class="py-3 px-3 border-r border-b align-middle">¥${summary[cn].total.toFixed(2)}</td>
                     <td class="py-3 px-3 text-green-600 border-r border-b align-middle">¥${summary[cn].paid.toFixed(2)}</td>
@@ -275,7 +275,7 @@
                     element.classList.remove('export-expand', 'export-fix'); 
                     btn.innerHTML = originalText;
                 }).catch(err => { 
-                    alert('截图失败'); 
+                    showToast("截图失败", 'error'); 
                     scrollContainers.forEach(el => el.classList.remove('export-expand')); 
                     element.classList.remove('export-expand', 'export-fix'); 
                     btn.innerHTML = originalText; 
@@ -298,7 +298,7 @@
         };
         
         window.exportCSV = function() {
-            if(groupData.length===0) return alert('无数据');
+            if(groupData.length===0) { showToast('无数据', 'info'); return; }
             let csv = "\uFEFF唯一ID,团期,分类,角色,单价,数量,买家,到货状态,交肾状态,柄图链接\n";
             groupData.forEach(i => { let key = `${i.batch}|${i.category}|${i.character}`; let imgUrl = imageUrlData[key] || ''; csv += `${i.id},${i.batch},${i.category},${i.character},${i.price},${i.count},${i.cn},${i.status},${i.paidStatus||'未交'},${imgUrl}\n`; });
             const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' })); a.download = "排单云端数据备份.csv"; a.click();
@@ -326,7 +326,7 @@
         }
 
         window.exportCSV = function() {
-            if(groupData.length===0) return alert('无数据');
+            if(groupData.length===0) { showToast('无数据', 'info'); return; }
             let csv = "\uFEFF唯一ID,团期,分类,角色,单价,数量,买家,到货状态,交肾状态,柄图链接\n";
             groupData.forEach(i => { let key = `${i.batch}|${i.category}|${i.character}`; let imgUrl = imageUrlData[key] || ''; csv += `${i.id},${i.batch},${i.category},${i.character},${i.price},${i.count},${i.cn},${i.status},${i.paidStatus||'未交'},${imgUrl}\n`; });
             const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' })); a.download = "排单云端数据备份.csv"; a.click();
@@ -379,7 +379,7 @@
         };
 
         function processImportedData(rows) {
-            if(rows.length < 2) return alert("文件内容为空或格式错误！");
+            if(rows.length < 2) { showToast("文件内容为空或格式错误！", 'warning'); return; }
             
             let isMatrix = false;
             if(rows.length >= 4) {
@@ -464,9 +464,9 @@
                             });
                         }
                     }
-                } catch(err) { 
+                } catch(err) {
                     console.error(err);
-                    return alert("矩阵格式解析失败，请检查表格是否符合要求。"); 
+                    { showToast("矩阵格式解析失败，请检查表格是否符合要求。", 'error'); return; }
                 }
             } else {
                 let headers = rows[0].map(h => String(h).trim());
@@ -523,8 +523,8 @@
                 if (hasNewImage) saveImageUrlData();
                 updateSidebar();
                 renderManageTable();
-                alert(`成功智能识别并导入 ${newRecords.length} 条排单数据！已同步至云端。`);
+                showToast("成功智能识别并导入 ${newRecords.length} 条排单数据！已同步至云端。", 'success');
             } else {
-                alert("未能识别到有效数据，请检查表格内容。");
+                showToast("未能识别到有效数据，请检查表格内容。", 'warning');
             }
         }

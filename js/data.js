@@ -1,19 +1,3 @@
-        let groupData = [];
-        let imageUrlData = {};
-        
-        let currentManageBatch = 'all';
-        let currentSearchKeyword = ''; 
-        
-        window.scheduleSteps = {};
-        window.scheduleCols = {}; 
-
-        let currentEditImageKey = '';
-        let currentUser = null;
-        let resetTargetEmail = ''; 
-        let registerTargetEmail = ''; 
-        let draggedItemRowId = null;
-        let dismissedReqIds = new Set();
-
         async function forceRefreshData() {
             if(!currentUser) return;
             showLoading('正在从云端拉取最新数据...');
@@ -29,14 +13,9 @@
                     if(activeTabBtn) { switchTab(activeTabBtn.id.replace('tab-', '')); }
                     updateSyncStatus('saved');
                 }
-            } catch(e) { console.error(e); alert('刷新拉取失败，请检查网络！'); } 
+            } catch(e) { console.error(e); showToast('刷新拉取失败，请检查网络！', 'error'); }
             finally { hideLoading(); }
         }
-
-        db.auth.getSession().then(({ data: { session } }) => {
-            if (session) { currentUser = session.user; initCloudData(); }
-            else showScreen('portal-screen');
-        });
 
         let saveTimeout = null;
         async function syncToCloud() {
