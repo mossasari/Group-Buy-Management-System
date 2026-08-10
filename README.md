@@ -1,70 +1,70 @@
-# 排单管理系统
+# 谷圈云端排单管理系统
 
- **Design by 秋洛** 
+ **Design by 秋洛 (QiuLuo)** 
 
-一个专为吃谷、拼团、代购设计的排单管理系统。基于 HTML+Supabase 构建，数据云端实时同步。请与教程站配合食用。
+一个专为“二次元吃谷、拼团、代购”量身打造的**轻量级、无服务器 (Serverless) 纯前端排单系统**。
 
-🌐 **项目教程与演示站：** [qiuluo.netlify.app](https://qiuluo.netlify.app)
+告别杂乱无章的 Excel 表格、繁琐的找人补邮、混乱的快递单号。让团长轻松管理，让团员自助查单！
 
-📕 **小红书主页：** [特蕾西娅全肯定bot（95876277244）]
+**图文教程站：** [qiuluo.netlify.app](https://qiuluo.netlify.app)
 
----
-
-## 开源声明与使用规范 (License & Usage Rules)
-
-本项目秉持开源共享精神，欢迎各位开发者、团长共同交流与改进。但为了保护原作者的权益，任何人使用、修改或二次分发本项目代码，**必须严格遵守以下规范**：
-
-1. **必须署名 (Attribution)：** 任何基于本项目的二次修改版本、衍生作品，必须在程序的显著位置（如首页、关于页面）以及代码仓库的说明中，明确标明原作者为 **秋洛**，并附带本原版项目地址或教程地址（https://qiuluo.netlify.app ），且修改代码时不得将design by 秋洛删除。
-
-2. **公开与共享 (ShareAlike)：** 允许二次传播与修改，但**修改后的代码必须同样公开**（不得闭源）。二次传播时必须附带说明修改点及出处，**严禁任何形式的私下自传播、隐藏源码或将本项目包装为私有商业产品**。
-
-3. **禁止倒卖 (Non-Commercial)：** 本项目代码完全免费，严禁任何人将本源码或基于本源码的修改版用于直接售卖盈利。
-
-> **对协作开发者的寄语：** 非常欢迎大家Fork本项目并提交 PR (Pull Request)！如果您在原版基础上开发了非常好用的新功能，欢迎随时与我联系合并，让我们一起把它变得更好！
+**小红书主页：** [特蕾西娅全肯定bot](https://xhslink.cn/m/83wcvC8Rc2i)
 
 ---
-
 ## 适用范围
 
 本项目适用于：
-* 吧唧、立牌等二次元谷子、ip的拼团管理。
+
+* 吧唧、立牌、纸片等二次元谷子、ip的拼团管理。
   
 * 需要处理复杂“排发”、“交肾（补款）”、“囤货地管理”的团长。
   
 * 希望有一个免登录查询中心供团员自助查单，且无需额外开支。
+---
+
+## 许可协议与使用界限 (License & Usage Boundaries)
+
+本项目采用 **CC BY-NC-SA 4.0 (署名-非商业性使用-相同方式共享 4.0 国际) [<sup>1</sup>](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)** 协议开源。
+
+为了保护原作者的著作权，任何人使用、Fork、修改或二次分发本项目代码，**必须严格遵守以下界限**：
+
+1. **必须署名 (Attribution)：** 必须在衍生项目的显著位置（如页面底部、系统首页及 README 中）明确标明原作者为 **秋洛**，并附带原项目教程地址（https://qiuluo.netlify.app ）。
+   
+2.. **非商业性使用 (Non-Commercial)：** **【红线】** 严禁将本源码、衍生修改版用于任何形式的商业盈利、倒卖、或包装为付费SaaS产品。
+   
+3. **相同方式共享 (ShareAlike)：** 如果您修改了本代码，您必须将修改后的版本**以相同的开源协议公开分享**。严禁私下闭源传播或私自独占修改成果。
+
+> **致开发者：** 只要您遵循以上三点（保留署名、不拿去卖钱、修改后同样开源），您可以自由地修改代码、增加新功能。如果您在原版基础上开发了非常好用的新功能，欢迎随时与我联系合并，让我们一起把它变得更好！
 
 ---
 
-## 核心功能 (Features)
+## 核心功能架构 (Features)
 
-* **双端分离设计：** 
-  * **团长端（需密码）：** 录入排表、管理订单、柄图管理、交肾审批、排发打单、云端全局设置。
-    
-  * **团员端（免登录）：** 凭密钥+CN自助查单、合并团期交肾并上传截图、勾选多仓库商品申请排发。
-  
-* **Serverless 架构：** 纯 HTML 文件，依靠 Supabase 提供数据库和图床服务，极低成本甚至零成本运行。
-  
-* **智能图床与柄图复用：** 支持本地上传图片自动压缩转存直链，支持跨团期一键复用同名角色柄图。
-  
-* **吃谷成就系统：** 趣味化的排行榜功能，自动计算个人吃谷数量与肾额在全团的排名（自动过滤代排数据）。
+### 团长管理端（需登录访问）
+* **智能数据导入：** 支持快捷手动录入，或通过 Excel/CSV 一键批量导入复杂排单。
+* **图床与柄图库：** 内置图床直传接口，支持本地上传或直链粘贴。
+* **智能肾表与交肾审核：** 自动聚合生成排表&肾表并支持一键导出长图。后台可视化审核团员提交的付款截图。
+* **多仓排发管理：** 支持为不同团期分配不同“囤货地（仓库）”，分别设置邮费与收款码。在线审核发货申请，一键填入快递单号并上传发货平铺图。
+
+### 团员自助端（免登录访问）
+* **密钥+CN 防隐私泄露：** 团员只需输入团长设置的“全局密钥”和“完整CN”即可访问专属数据。
+* **订单总览与交肾：** 自动汇总所有未交款项，合并生成付款单，支持一键上传转账截图。
+* **智能排发申请：** 自动过滤未到货/未交肾商品。强制“同仓库合并发货”防呆校验，支持手指滑动屏幕**连选**谷子。
+* **清单自由导出：** 内置排发 List 生成器，支持自由拖拽排序，支持按“团期大标题”或“谷子明细”按需导出文字或长图，方便直接排发。
+* **吃谷成就排名：** 趣味系统，根据录入数据自动计算该团员在本团的“吃谷总数”与“消费金额”排位。
+
+更多功能介绍详见教程站：[qiuluo.netlify.app](https://qiuluo.netlify.app)
 
 ---
 
-## 部署方法 (Deployment)
+## 技术栈 (Tech Stack)
 
-部署非常简单，无需具备深厚的编程基础：
-
-1. 注册并创建一个 [Supabase](https://supabase.com/) 免费云数据库。
-   
-3. 运行本教程提供的“一键初始化 SQL 脚本”生成数据表。
-   
-5. 在代码最上方填入你的 `SUPABASE_URL` 和 `SUPABASE_KEY`。
-   
-7. （可选）配置你的自定义 SMTP 邮箱服务用于管理员注册。
-   
-9. 将最终的 HTML 文件直接丢进 Vercel、Netlify 或 GitHub Pages 即可免费上线。
-
-**详细图文保姆级教程请访问：** [https://qiuluo.netlify.app](https://qiuluo.netlify.app)
+* **前端框架：** HTML5, Vanilla JavaScript, CSS3
+* **UI 样式：** Tailwind CSS (CDN 引入)
+* **后端 / 数据库 / 鉴权：** Supabase (PostgreSQL, GoTrue)
+* **核心插件：** 
+  * `xlsx.full.min.js` (Excel 数据解析)
+  * `html2canvas.min.js` (DOM 元素截图导出)
 
 ---
 
@@ -85,4 +85,67 @@
 * [ ] 更解放大脑的自动凑单功能
      
 * [ ] 更多灵机一动的鬼脑功能
+
+---
+
+## 开发者快速部署指南 (Quick Start)
+
+对于小白团长，请直接访问 官方教程 [qiuluo.netlify.app](https://qiuluo.netlify.app) 查阅图文部署步骤。
+对于开发者，可以通过以下步骤快速复刻本项目：
+
+1. 克隆本仓库。
+2. 在 [Supabase](https://supabase.com/) 创建新项目。
+3. 在 Supabase SQL Editor 中运行以下初始化脚本，建立表结构并配置 RLS 权限：
+
+```sql
+-- 1. 创建核心数据表 (自带级联删除)
+CREATE TABLE leader_data (
+  user_id uuid references auth.users ON DELETE CASCADE primary key, 
+  query_key text unique,                                            
+  group_data jsonb default '[]',                                    
+  image_data jsonb default '{}',                                    
+  updated_at timestamp with time zone default timezone('utc'::text, now())
+);
+
+-- 2. 开启行级安全策略 (RLS)
+ALTER TABLE leader_data ENABLE ROW LEVEL SECURITY;
+
+-- 3. 团长增删改查自己数据的权限
+CREATE POLICY "团长完全管理自己的数据" ON leader_data
+  FOR ALL USING (auth.uid() = user_id);
+
+-- 4. 团员免登录查询权限
+CREATE POLICY "允许公开读取数据" ON leader_data
+  FOR SELECT USING (true);
+
+-- 5. 团员免登录提交申请权限
+CREATE POLICY "允许公开提交申请" ON leader_data
+  FOR UPDATE USING (true) WITH CHECK (true);
+```
+4. 提取您的 Supabase URL 和 ANON KEY。
+5. 在 index.html 的 <script> 配置区替换常量：
+```
+const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
+```
+6. （可选）在 Supabase 开启 Custom SMTP 以解锁无限制的邮箱注册功能。
+7. 使用任何 Web Server 或静态托管平台 (Vercel, GitHub Pages) 部署该 index.html 即可运行。
+
+---
+
+## 参与贡献 (Contributing)
+
+发现 Bug 或者有很棒的新功能想法？
+1. Fork 本仓库
+2. 创建您的 Feature 分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交您的修改 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 开启一个 Pull Request
+
+OR
+
+直接在小红书联系我！
+
+**再次感谢每一位为本项目提供建议与支持的朋友！愿天下没有难理的排表！**
+
 
