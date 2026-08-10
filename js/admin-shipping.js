@@ -219,7 +219,10 @@
             <div class="border border-indigo-200 p-3 rounded bg-indigo-50 shadow-sm mb-4">
                 <h4 class="font-bold text-indigo-700 mb-2">🖼️ 图床 API 配置</h4>
                 <div class="flex flex-col gap-2">
-                    <div><label class="text-xs text-gray-500">图床 API 地址 (默认: esaimg.cdn1.vip)</label><input type="text" id="host_api_url" value="${hostConfig.api || ''}" placeholder="https://esaimg.cdn1.vip/api/v1.php" class="w-full border border-gray-300 focus:border-indigo-500 rounded px-2 py-1 text-sm"></div>
+                    <div><label class="text-xs text-gray-500">图床 API 地址</label><input type="text" id="host_api_url" value="${hostConfig.api || ''}" placeholder="https://esaimg.cdn1.vip/api/v1.php" class="w-full border border-gray-300 focus:border-indigo-500 rounded px-2 py-1 text-sm"></div>
+                    <div><label class="text-xs text-gray-500">表单字段名 (默认: image)</label><input type="text" id="host_field" value="${hostConfig.field || ''}" placeholder="image" class="w-full border border-gray-300 focus:border-indigo-500 rounded px-2 py-1 text-sm"></div>
+                    <div><label class="text-xs text-gray-500">API Token/密钥 (可选)</label><input type="text" id="host_token" value="${hostConfig.token || ''}" placeholder="留空则不使用认证" class="w-full border border-gray-300 focus:border-indigo-500 rounded px-2 py-1 text-sm"></div>
+                    <div><label class="text-xs text-gray-500">响应中图片URL的JSON路径 (可选，例: data.links.url)</label><input type="text" id="host_resp_path" value="${hostConfig.respPath || ''}" placeholder="留空则自动识别" class="w-full border border-gray-300 focus:border-indigo-500 rounded px-2 py-1 text-sm"></div>
                 </div>
             </div>`;
 
@@ -249,7 +252,10 @@
                 };
             });
             let hostApi = document.getElementById('host_api_url').value.trim();
-            imageUrlData['__IMAGE_HOST_CONFIG__'] = JSON.stringify({ api: hostApi });
+            let hostField = document.getElementById('host_field').value.trim();
+            let hostToken = document.getElementById('host_token').value.trim();
+            let hostRespPath = document.getElementById('host_resp_path').value.trim();
+            imageUrlData['__IMAGE_HOST_CONFIG__'] = JSON.stringify({ api: hostApi, field: hostField, token: hostToken, respPath: hostRespPath });
             imageUrlData['__LOCATION_SETTINGS__'] = JSON.stringify(settings);
             saveImageUrlData();
             showToast('云端配置保存成功！', 'success');
