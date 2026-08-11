@@ -1,5 +1,6 @@
         async function forceRefreshData() {
             if(!currentUser) return;
+            if(currentUser.isDebug) { location.reload(); return; }
             showLoading('正在从云端拉取最新数据...');
             try {
                 const { data, error } = await db.from('leader_data').select('*').eq('user_id', currentUser.id).single();
@@ -20,6 +21,7 @@
         let saveTimeout = null;
         async function syncToCloud() {
             if(!currentUser) return;
+            if(currentUser.isDebug) { saveDataLocalOnly(); updateSyncStatus('saved'); return; }
             updateSyncStatus('saving'); clearTimeout(saveTimeout);
             saveTimeout = setTimeout(async () => {
                 try {

@@ -3,7 +3,7 @@
             document.getElementById('page-' + tabId).classList.remove('hidden');
             document.querySelectorAll('[id^="tab-"]').forEach(el => { el.classList.remove('tab-active', 'text-blue-500', 'text-purple-500', 'text-green-600', 'text-yellow-600'); el.classList.add('text-gray-500'); el.style.borderBottom = "none"; el.style.fontWeight = "normal"; });
             let activeTab = document.getElementById('tab-' + tabId);
-            if(tabId === 'cloud') { activeTab.classList.add('tab-active', 'text-purple-500'); activeTab.style.borderBottom = "2px solid #a855f7"; renderCloudSettings(); } 
+            if(tabId === 'cloud') { activeTab.classList.add('tab-active', 'text-purple-500'); activeTab.style.borderBottom = "2px solid #a855f7"; renderCloudSettings(); renderBgConfig(); renderFeatureToggles(); }
             else if(tabId === 'shipping') { activeTab.classList.add('tab-active', 'text-green-600'); activeTab.style.borderBottom = "2px solid #16a34a"; renderShippingAdmin(); }
             else if(tabId === 'payment') { activeTab.classList.add('tab-active', 'text-yellow-600'); activeTab.style.borderBottom = "2px solid #ca8a04"; renderPaymentAdmin(); }
             else { activeTab.classList.add('tab-active', 'text-blue-500'); activeTab.style.borderBottom = "2px solid #3b82f6"; }
@@ -38,7 +38,7 @@
         window.openImageModal = function(key) { currentEditImageKey = key; document.getElementById('imgUrlInput').value = imageUrlData[key] || ''; document.getElementById('imageUrlModal').classList.remove('hidden'); };
         window.closeImageModal = function() { document.getElementById('imageUrlModal').classList.add('hidden'); };
         window.saveImageUrl = function() { const url = document.getElementById('imgUrlInput').value.trim(); if(url) imageUrlData[currentEditImageKey] = url; else delete imageUrlData[currentEditImageKey]; saveImageUrlData(); closeImageModal(); renderImageManager(); };
-        window.deleteImage = function(key, event) { event.stopPropagation(); if(confirm('确定删除这张柄图？')) { delete imageUrlData[key]; saveImageUrlData(); renderImageManager(); } };
+        window.deleteImage = function(key, event) { event.stopPropagation(); showConfirmModal('确定删除这张柄图？').then(function(ok) { if(ok) { var deleted = imageUrlData[key]; delete imageUrlData[key]; saveImageUrlData(); renderImageManager(); showUndoToast('柄图已删除', function() { imageUrlData[key] = deleted; saveImageUrlData(); renderImageManager(); showToast('柄图已恢复', 'success'); }); } }); };
 
         window.openBatchImageModal = function(batch, cat) {
             currentBatchImageContext = { batch, cat };
@@ -67,16 +67,21 @@
                 }
             });
             saveImageUrlData(); closeBatchImageModal(); renderImageManager();
-            if(updated > 0) showToast("成功导入 ${updated} 个柄图链接！", 'success'); else showToast("未能识别到任何链接，请检查格式 (角色名,http链接)。", 'warning');
+            if(updated > 0) showToast(`成功导入 ${updated} 个柄图链接！`, 'success'); else showToast("未能识别到任何链接，请检查格式 (角色名,http链接)。", 'warning');
         };
 
         document.getElementById('itemForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            const batch = document.getElementById('inBatch').value.trim(), category = document.getElementById('inCategory').value.trim(), character = document.getElementById('inCharacter').value.trim(), price = parseFloat(document.getElementById('inPrice').value), multiplier = parseInt(document.getElementById('inMultiplier').value) || 1, names = document.getElementById('inCNs').value.split(/[\r\n]+/).map(n => n.trim()).filter(n => n !== '');
-            if(names.length === 0) { showToast('请输入买家CN', 'warning'); return; }
-            let countMap = {}; names.forEach(n => countMap[n] = (countMap[n] || 0) + multiplier);
-            for (const cn in countMap) groupData.push({ id: generateSafeId(), batch, category, character, price, count: countMap[cn], cn, status: '未到货', paidStatus: '未交' });
-            saveData(); document.getElementById('inCharacter').value = ''; document.getElementById('inCNs').value = ''; updateSidebar(); renderManageTable(); showToast("录入成功！", 'success');
+            var batch = document.getElementById('inBatch'), category = document.getElementById('inCategory'), character = document.getElementById('inCharacter'), price = document.getElementById('inPrice'), names = document.getElementById('inCNs');
+            var valid = true;
+            [batch, category, character].forEach(function(f) { if(!f.value.trim()) { f.classList.add('input-error'); valid = false; } else { f.classList.remove('input-error'); } });
+            if(!price.value || parseFloat(price.value) <= 0) { price.classList.add('input-error'); valid = false; } else { price.classList.remove('input-error'); }
+            if(!names.value.trim() || names.value.split(/[\r\n]+/).filter(function(n) { return n.trim(); }).length === 0) { names.classList.add('input-error'); valid = false; } else { names.classList.remove('input-error'); }
+            if(!valid) { showToast('请填写所有必填字段！', 'warning'); return; }
+            var batchVal = batch.value.trim(), categoryVal = category.value.trim(), characterVal = character.value.trim(), priceVal = parseFloat(price.value), multiplier = parseInt(document.getElementById('inMultiplier').value) || 1, nameList = names.value.split(/[\r\n]+/).map(function(n) { return n.trim(); }).filter(function(n) { return n !== ''; });
+            var countMap = {}; nameList.forEach(function(n) { countMap[n] = (countMap[n] || 0) + multiplier; });
+            for (var cn in countMap) groupData.push({ id: generateSafeId(), batch: batchVal, category: categoryVal, character: characterVal, price: priceVal, count: countMap[cn], cn: cn, status: '未到货', paidStatus: '未交' });
+            saveData(); character.value = ''; names.value = ''; updateSidebar(); renderManageTable(); showToast("录入成功！", 'success');
         });
 
         window.handleDragStart = function(e, id) { draggedItemRowId = id; e.dataTransfer.effectAllowed = 'move'; e.target.classList.add('dragging'); };
@@ -234,7 +239,7 @@
                 let detailsHtml = `<div class="grid ${colsClass} gap-2 w-full">`;
                 detailKeys.forEach(d => {
                     detailsHtml += `
-                        <div class="text-[11px] text-gray-600 bg-gray-50 hover:bg-blue-50 p-1.5 rounded border border-gray-100 flex items-center justify-between gap-2 transition-colors">
+                        <div class="text-[11px] text-gray-600 bg-gray-50 hover:bg-blue-50 hover:text-blue-700 p-1.5 rounded border border-gray-100 flex items-center justify-between gap-2 transition-colors">
                             <span class="truncate pr-1 font-medium" title="${escapeHtml(d)}">• ${escapeHtml(d)}</span>
                             <strong class="text-blue-500 font-bold whitespace-nowrap text-xs">×${summary[cn].details[d]}</strong>
                         </div>`;
@@ -286,7 +291,11 @@
         document.getElementById('manageTableBody').addEventListener('click', function(e) {
             if(e.target.classList.contains('btn-delete')) {
                 let id = e.target.getAttribute('data-id');
-                if(confirm('删除后不可恢复并会同步云端，确定要删除？')) { groupData = groupData.filter(i => i.id !== id); saveData(); updateSidebar(); renderManageTable(); }
+                var itemToDel = groupData.find(function(i) { return i.id === id; });
+                showConfirmModal('删除后不可恢复并会同步云端，确定要删除？').then(function(ok) {
+                    if(ok) { groupData = groupData.filter(function(i) { return i.id !== id; }); saveData(); updateSidebar(); renderManageTable();
+                    if(itemToDel) showUndoToast('已删除「' + itemToDel.character + '」', function() { groupData.push(itemToDel); saveData(); updateSidebar(); renderManageTable(); showToast('已恢复', 'success'); }); }
+                });
             } else if (e.target.classList.contains('btn-edit')) {
                 window.openEditModal(e.target.getAttribute('data-id'));
             }
@@ -325,13 +334,6 @@
             return lines;
         }
 
-        window.exportCSV = function() {
-            if(groupData.length===0) { showToast('无数据', 'info'); return; }
-            let csv = "\uFEFF唯一ID,团期,分类,角色,单价,数量,买家,到货状态,交肾状态,柄图链接\n";
-            groupData.forEach(i => { let key = `${i.batch}|${i.category}|${i.character}`; let imgUrl = imageUrlData[key] || ''; csv += `${i.id},${i.batch},${i.category},${i.character},${i.price},${i.count},${i.cn},${i.status},${i.paidStatus||'未交'},${imgUrl}\n`; });
-            const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' })); a.download = "排单云端数据备份.csv"; a.click();
-        };
-
         window.importFileHandler = function(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -344,19 +346,9 @@
                     const workbook = XLSX.read(data, {type: 'array'});
                     const firstSheetName = workbook.SheetNames[0];
                     const worksheet = workbook.Sheets[firstSheetName];
-                    const rows = XLSX.utils.sheet_to_json(worksheet, {header: 1, raw: false, defval: ""});
-                    
-                    // 将对象数组转成按列排序的二维数组 (模拟 CSV 解析的结果)
-                    let arrayRows = [];
-                    if(rows.length > 0) {
-                        const headers = Object.keys(rows[0]);
-                        arrayRows.push(headers);
-                        rows.forEach(r => {
-                            let rowArr = [];
-                            headers.forEach(h => rowArr.push(r[h] ? String(r[h]) : ""));
-                            arrayRows.push(rowArr);
-                        });
-                    }
+                    let arrayRows = XLSX.utils.sheet_to_json(worksheet, {header: 1, raw: false, defval: ""});
+                    // Ensure all cells are strings for consistent handling downstream
+                    arrayRows = arrayRows.map(row => row.map(cell => cell == null ? '' : String(cell)));
                     processImportedData(arrayRows);
                     event.target.value = ''; // 清空选择
                 };
@@ -523,7 +515,7 @@
                 if (hasNewImage) saveImageUrlData();
                 updateSidebar();
                 renderManageTable();
-                showToast("成功智能识别并导入 ${newRecords.length} 条排单数据！已同步至云端。", 'success');
+                showToast(`成功智能识别并导入 ${newRecords.length} 条排单数据！已同步至云端。`, 'success');
             } else {
                 showToast("未能识别到有效数据，请检查表格内容。", 'warning');
             }

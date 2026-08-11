@@ -2,7 +2,7 @@
             let key = document.getElementById('rankKeyInput').value.trim();
             let myCn = document.getElementById('rankCnInput').value.trim();
             
-            if(!key || !myCn) { showToast("密钥和CN不能为空！", 'warning'); return; }
+            if(!key || !myCn) { showToast("密钥和CN不能为空！🔑 请输入团长提供的查询密钥和你的CN。", 'warning'); return; }
             
             showLoading('正在生成你的吃谷报告...');
             let res = await db.from('leader_data').select('group_data').eq('query_key', key).limit(1);
@@ -13,7 +13,7 @@
             hideLoading();
             
             let data = res.data ? res.data[0] : null;
-            if(!data) { showToast("未找到密钥！", 'error'); return; }
+            if(!data) { showToast("未找到密钥！🤔 请检查密钥是否正确，或联系团长获取最新密钥。", 'error'); return; }
             
             let allItems = data.group_data || [];
             if(allItems.length === 0) { showToast("团长还没有录入任何谷子哦！", 'info'); return; }
@@ -35,7 +35,7 @@
             
             let myLowerCn = myCn.toLowerCase();
             if(!userStats[myLowerCn]) {
-                showToast("没有找到你的吃谷记录哦！(请确保CN严格一致，系统不会计算代排数据)", 'info'); return;
+                showToast("没有找到你的吃谷记录哦！请确保CN与团长录入时完全一致（不含空格），代排数据不计入排名。", 'info'); return;
             }
             
             let myData = userStats[myLowerCn];
@@ -79,7 +79,7 @@
         async function doBuyerSearch() {
             let key = document.getElementById('queryKeyInput').value.trim();
             let cn = document.getElementById('queryCnInput').value.trim().toLowerCase();
-            if(!key || !cn) { showToast("密钥和CN不能为空！", 'warning'); return; }
+            if(!key || !cn) { showToast("密钥和CN不能为空！🔑 请输入团长提供的查询密钥和你的CN。", 'warning'); return; }
 
             showLoading('查询中...');
                         let res = await db.from('leader_data').select('group_data, image_data').eq('query_key', key).limit(1);
@@ -91,10 +91,10 @@
             const data = res.data ? res.data[0] : null;
             const error = res.error;
             hideLoading();
-            if(!data) { showToast("未找到密钥！", 'error'); return; }
+            if(!data) { showToast("未找到密钥！🤔 请检查密钥是否正确，或联系团长获取最新密钥。", 'error'); return; }
 
             let myItems = data.group_data.filter(item => item.cn.toLowerCase().includes(cn));
-            if(myItems.length === 0) { showToast("未查到相关数据。", 'info'); return; }
+            if(myItems.length === 0) { showToast("未查到相关数据。🤔 请确认CN拼写与团长录入一致，或尝试更换查询密钥。", 'info'); return; }
 
             window.currentBuyerSearchItems = myItems;
             window.currentBuyerSearchImgData = data.image_data || {};
@@ -212,7 +212,7 @@
             let key = document.getElementById('payKeyInput').value.trim(); 
             currentPayRawCn = document.getElementById('payCnInput').value.trim();
             currentPayBuyerCn = currentPayRawCn.toLowerCase(); 
-            if(!key || !currentPayRawCn) { showToast("密钥和CN不能为空！", 'warning'); return; }
+            if(!key || !currentPayRawCn) { showToast("密钥和CN不能为空！🔑 请输入团长提供的查询密钥和你的CN。", 'warning'); return; }
             showLoading("查询中..."); 
                         let res = await db.from('leader_data').select('user_id, group_data, image_data').eq('query_key', key).limit(1);
             if(res.error || !res.data || res.data.length === 0) {
@@ -222,7 +222,7 @@
             const data = res.data ? res.data[0] : null;
             const error = res.error; 
             hideLoading();
-            if(error || !data) { showToast("未找到密钥或团长未设置全局密钥！", 'error'); return; }
+            if(error || !data) { showToast("未找到密钥或团长未设置全局密钥！🔑 请确认密钥正确，或联系团长完成设置。", 'error'); return; }
             currentPayKey = key; payUserId = data.user_id; let imgData = data.image_data || {}; 
             currentPayData.imgData = imgData;
             let reqs = JSON.parse(imgData['__PAYMENT_REQS__'] || '[]');
@@ -277,16 +277,21 @@
         window.closePayForm = function() { document.getElementById('payFormModal').classList.add('hidden'); }
 
         window.submitPayment = async function() {
-            if(!window.currentBuyerUploadBase64) { showToast("请必须上传交肾付款截图！", 'warning'); return; }
-            let req = { id: generateSafeId(), cn: currentPayRawCn, batch: window.currentPayContext.batch, items: window.currentPayContext.itemIds, amount: window.currentPayContext.total, proofImg: window.currentBuyerUploadBase64, remark: document.getElementById('payRemark').value.trim(), status: '待审核', time: Date.now() };
+            if(!window.currentBuyerUploadBase64) { showToast("请上传交肾付款截图！", 'warning'); return; }
+            var ctx = window.currentPayContext;
+            var confirmed = await showConfirmModal(
+                '确认提交交肾作业？<br><br><span class="text-sm text-gray-500">团期：' + escapeHtml(ctx.batch) + '<br>金额：¥' + ctx.total.toFixed(2) + '<br>商品数：' + ctx.itemIds.length + ' 件</span>',
+                '确认提交', '再检查下');
+            if(!confirmed) return;
+            let req = { id: generateSafeId(), cn: currentPayRawCn, batch: ctx.batch, items: ctx.itemIds, amount: ctx.total, proofImg: window.currentBuyerUploadBase64, remark: document.getElementById('payRemark').value.trim(), status: '待审核', time: Date.now() };
             showLoading("提交作业中...");
             try {
                 const { data } = await db.from('leader_data').select('image_data').eq('user_id', payUserId).single();
                 let imgData = data.image_data || {}; let latestReqs = JSON.parse(imgData['__PAYMENT_REQS__'] || '[]');
                 latestReqs.push(req); imgData['__PAYMENT_REQS__'] = JSON.stringify(latestReqs);
                 const { error } = await db.from('leader_data').update({ image_data: imgData }).eq('user_id', payUserId);
-                if(error) throw error; hideLoading(); closePayForm(); showToast("交肾作业提交成功，等待团长批改！", 'success'); doPaymentSearch(); 
-            } catch(e) { hideLoading(); showToast("提交失败！", 'error'); }
+                if(error) throw error; hideLoading(); closePayForm(); showToast("交肾作业提交成功，等待团长批改！", 'success'); doPaymentSearch();
+            } catch(e) { hideLoading(); showToast("提交失败！请检查网络后重试。", 'error'); }
         }
 
         // ================= 排发系统核心逻辑 =================
@@ -300,7 +305,7 @@
             currentShipRawCn = document.getElementById('shipCnInput').value.trim();
             currentShipBuyerCn = currentShipRawCn.toLowerCase(); 
             
-            if(!key || !currentShipRawCn) { showToast("密钥和CN不能为空！", 'warning'); return; }
+            if(!key || !currentShipRawCn) { showToast("密钥和CN不能为空！🔑 请输入团长提供的查询密钥和你的CN。", 'warning'); return; }
             
             showLoading("查询中..."); 
                         let res = await db.from('leader_data').select('user_id, group_data, image_data').eq('query_key', key).limit(1);
@@ -314,7 +319,7 @@
             
             if(error || !data) {
                 console.error("查询错误:", error);
-                showToast("未找到密钥或团长未设置全局密钥！", 'error'); return;
+                showToast("未找到密钥或团长未设置全局密钥！🔑 请确认密钥正确，或联系团长完成设置。", 'error'); return;
             }
             
             currentShipKey = key; shipUserId = data.user_id;
@@ -453,7 +458,7 @@
                     
                     hideLoading(); showToast("反馈提交成功！团长那边已经能看到了。", 'success');
                 }
-            } catch(e) { hideLoading(); showToast("反馈提交失败！请联系团长。", 'error'); }
+            } catch(e) { hideLoading(); showToast("反馈提交失败！请检查网络后重试。", 'error'); }
         }
         
         window.updateShipSelection = function(cb) {
@@ -584,13 +589,14 @@
                 latestReqs.push(req); imgData['__SHIPPING_REQS__'] = JSON.stringify(latestReqs);
                 const { error } = await db.from('leader_data').update({ image_data: imgData }).eq('user_id', shipUserId);
                 if(error) throw error; hideLoading(); closeShipForm(); showToast("提交成功！", 'success'); doShippingSearch(); 
-            } catch(e) { hideLoading(); showToast("提交失败！请联系团长开放数据库允许匿名修改。", 'error'); }
+            } catch(e) { hideLoading(); showToast("提交失败！请检查网络后重试，或联系团长。", 'error'); }
         }
         // ================= 排发清单导出逻辑 =================
         // openShipExportModal 定义在 shipping-export.js 中
 
         window.deleteBuyerShipReq = async function(reqId) {
-            if(!confirm('确定要撤销并删除这条排发申请吗？\n撤销后你可以重新勾选商品发起申请。')) return;
+            var shipConfirmed = await showConfirmModal('确定要撤销并删除这条排发申请吗？撤销后你可以重新勾选商品发起申请。');
+            if(!shipConfirmed) return;
             showLoading("撤销中...");
             try {
                 const { data } = await db.from('leader_data').select('image_data').eq('user_id', shipUserId).single();
@@ -608,6 +614,6 @@
                 doShippingSearch(); 
             } catch(e) {
                 hideLoading();
-                showToast("撤销失败！请联系团长。", 'error');
+                showToast("撤销失败！请检查网络后重试。", 'error');
             }
         }

@@ -14,8 +14,8 @@
                     canvas.width = width; canvas.height = height;
                     const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
                     
-                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8); 
-                    
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+
                     const remoteUrl = await uploadToImageHost(compressedBase64);
                     hideLoading();
 
@@ -25,14 +25,14 @@
                     } else {
                         showToast("图片上传失败，请重试！", 'error');
                     }
-                    inputEl.value = ''; 
+                    inputEl.value = '';
                 }
             }
         }
 
         function getImageApiUrl() {
             const config = JSON.parse(imageUrlData['__IMAGE_HOST_CONFIG__'] || '{}');
-            return config.api || 'https://esaimg.cdn1.vip/api/v1.php';
+            return config.api || '';
         }
 
         function dataURLtoFile(dataurl, filename) {
@@ -142,12 +142,12 @@
                     const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
                     
                     const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
-                    
+
                     const remoteUrl = await uploadToImageHost(compressedBase64);
                     hideLoading();
 
                     if (remoteUrl) {
-                        window.currentBuyerUploadBase64 = remoteUrl; 
+                        window.currentBuyerUploadBase64 = remoteUrl;
                         document.getElementById(previewId).classList.remove('hidden');
                         document.getElementById(previewId).querySelector('img').src = remoteUrl;
                     } else {
@@ -175,9 +175,9 @@
                     const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
                     
                     const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
-                    
+
                     const remoteUrl = await uploadToImageHost(compressedBase64);
-                    
+
                     if (remoteUrl) {
                         updateShipAdminReq(reqId, 'proofImg', remoteUrl);
                     } else {
