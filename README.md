@@ -2,7 +2,7 @@
 
  **Design by 秋洛 (QiuLuo)** 
 
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/mossasari/Group-Buy-Management-System)
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/zhengdaode/Aoi-system)
 
 一个专为”二次元吃谷、拼团、代购”量身打造的**轻量级、无服务器 (Serverless) 纯前端排单系统**。
 
