@@ -2,7 +2,7 @@
 
  **Design by 秋洛 (QiuLuo)** 
 
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/mossasari/Group-Buy-Management-System)
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/zhengdaode/Aoi-system)
 
 一个专为”二次元吃谷、拼团、代购”量身打造的**轻量级、无服务器 (Serverless) 纯前端排单系统**。
 
@@ -73,21 +73,32 @@
 
 ## 未来更新计划 (Roadmap)
 
-* [ ] 删掉不必要的功能
-      
-* [x] 涉及上传图片的功能可以直接在网站内上传后直接图床转存
-      
-* [ ] 交肾/排发订单团长会收到提醒
-      
-* [ ] 新增管理入口，可以分开管理团内事务（现阶段只能一个号两边用）
+> 详细进度见 [docs/IMPROVEMENT_PLAN.md](./docs/IMPROVEMENT_PLAN.md)
 
-* [ ] 界面美化（皮肤系统）
-      
-* [ ] 推车收集和自动算捆功能
-      
-* [ ] 更解放大脑的自动凑单功能
-     
-* [ ] 更多灵机一动的鬼脑功能
+### ✅ 已完成 (v1.2.0)
+
+* [x] 删掉不必要的功能（副团长模式）
+* [x] 图片上传后直接图床转存
+* [x] 邮箱验证链接不再跳转 localhost
+* [x] Toast 通知系统替换所有 alert 弹窗
+* [x] 图床 API 可配置（支持 Chevereto / Lsky Pro）
+* [x] 关于页面（版本号 / 原作者 / 许可证）
+* [x] XSS 防护（escapeHtml 全面覆盖）
+* [x] 多项关键 Bug 修复（保存/查询/密钥/上传）
+
+### ⬜ 待实施
+
+* [ ] **P4** 交肾/排发订单团长实时提醒
+* [ ] **P5** 二次元风格界面美化（皮肤系统）
+* [x] **P6** 黑夜模式 ✅ v1.3.0
+* [ ] **P7** 团长/团员分离管理入口
+* [ ] **P8** 推车收集和自动算捆功能
+* [ ] **P9** 自动凑单功能
+* [ ] **P10** 更多脑洞功能
+
+### ✨ v1.4.0 新增：国际运费加权计算
+
+在首页和仪表盘均可进入 **🌍 国际运费计算** 页面。按商品重量比例分摊国际运费，支持手动微调加权费用。可自动从团购系统导入商品清单。详见独立仓库 [intl-freight-calc](https://github.com/zhengdaode/intl-freight-calc)。
 
 ---
 
@@ -173,9 +184,14 @@ const SUPABASE_KEY = 'your-anon-key';
 │   ├── shipping-export.js  # 排发导出
 │   └── admin-shipping.js   # 排发审核 / 云端设置
 ├── README.md
+├── CHANGELOG.md
 ├── LICENSE                 # CC BY-NC-SA 4.0
 ├── CONTRIBUTING.md         # 贡献指南
 └── netlify.toml            # 部署配置 + 安全头
+
+../intl-freight-calc/       # 国际运费加权计算器（独立仓库）
+├── index.html              # 独立运行入口
+└── js/ifc-*.js             # 计算引擎、表格、面板、导入导出
 ```
 
 ---

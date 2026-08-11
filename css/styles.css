@@ -33,3 +33,71 @@
 .dragging { opacity: 0.5; }
 .drag-handle { cursor: grab; }
 .drag-handle:active { cursor: grabbing; }
+
+/* P6: 黑夜模式全局覆盖 */
+html.dark .bg-white { background-color: #1e293b; }
+html.dark .bg-gray-50 { background-color: #0f172a; }
+html.dark .bg-gray-100 { background-color: #1a1a2e; }
+html.dark .bg-blue-50 { background-color: #1e2a4a; }
+html.dark .bg-green-50 { background-color: #1a2e1a; }
+html.dark .bg-yellow-50 { background-color: #2e2a1a; }
+html.dark .bg-pink-50 { background-color: #2e1a2a; }
+html.dark .bg-purple-50 { background-color: #251a2e; }
+html.dark .bg-indigo-50 { background-color: #1a1f2e; }
+html.dark .bg-amber-50 { background-color: #2e281a; }
+html.dark .text-gray-700, html.dark .text-gray-800 { color: #cbd5e1; }
+html.dark .text-gray-500 { color: #94a3b8; }
+html.dark .text-gray-400 { color: #64748b; }
+html.dark .text-gray-600 { color: #a0aec0; }
+html.dark .text-blue-600 { color: #93c5fd; }
+html.dark .text-green-700 { color: #86efac; }
+html.dark .text-yellow-700 { color: #fde68a; }
+html.dark .text-pink-600 { color: #f9a8d4; }
+html.dark .text-purple-700 { color: #c4b5fd; }
+html.dark .text-indigo-700 { color: #a5b4fc; }
+html.dark .text-amber-700 { color: #fcd34d; }
+html.dark .border-gray-200 { border-color: #334155; }
+html.dark .border-gray-100 { border-color: #1e293b; }
+html.dark .border-purple-100, html.dark .border-indigo-100,
+html.dark .border-pink-100, html.dark .border-amber-100,
+html.dark .border-blue-100, html.dark .border-green-100,
+html.dark .border-yellow-100 { border-color: #334155; }
+html.dark .border-purple-200 { border-color: #4c1d95; }
+html.dark .border-indigo-200 { border-color: #312e81; }
+html.dark .border-pink-200 { border-color: #831843; }
+html.dark .border-green-200 { border-color: #14532d; }
+html.dark .border-yellow-200 { border-color: #713f12; }
+html.dark input, html.dark textarea, html.dark select {
+    background-color: #334155; color: #e2e8f0; border-color: #475569;
+}
+html.dark input::placeholder, html.dark textarea::placeholder { color: #64748b; }
+html.dark table { background-color: #1e293b; }
+html.dark th { background-color: #0f172a; color: #94a3b8; }
+html.dark td { border-color: #334155; }
+html.dark .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0,0,0,0.3); }
+html.dark .shadow { box-shadow: 0 1px 3px 0 rgba(0,0,0,0.4); }
+html.dark #globalLoading > div:first-child { background-color: #1e293b; }
+html.dark #globalLoading > div:first-child > div { border-color: #93c5fd; }
+
+/* P15: 自定义背景遮罩层 */
+body.has-custom-bg::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, var(--bg-overlay-opacity, 0.4));
+    z-index: -1;
+    pointer-events: none;
+}
+body.has-custom-bg {
+    position: relative;
+}
+body.has-custom-bg > * {
+    position: relative;
+    z-index: 0;
+}
+
+/* P0: 行内验证错误样式 */
+.input-error { border-color: #ef4444 !important; background-color: #fef2f2 !important; }
+html.dark .input-error { border-color: #f87171 !important; background-color: #3b1a1a !important; }
+
+/* P1: 首次访问引导覆盖层 */

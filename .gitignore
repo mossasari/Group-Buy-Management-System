@@ -1,1 +1,5 @@
 index-original.html
+node_modules/
+.claude/
+assessment-b-*.png
+*.output

@@ -69,13 +69,13 @@
                 } else if (fStatus === '已查看，无问题') {
                     feedbackHtml = `<div class="bg-green-50 border border-green-200 p-2 rounded text-xs mt-2"><strong class="text-green-700">✅ 团员反馈：已确认无问题</strong><span class="text-green-600 ml-2">备注：${fRemark}</span></div>`;
                 } else {
-                    feedbackHtml = `<div class="text-xs text-gray-400 mt-2">团员尚未反馈平铺图查看情况</div>`;
+                    feedbackHtml = `<div class="text-xs text-green-600 mt-2">团员尚未反馈平铺图查看情况</div>`;
                 }
 
                 list.innerHTML += `
                 <div class="border border-green-100 bg-green-50 p-4 rounded shadow-sm relative">
                     <div class="flex justify-between items-center border-b border-green-200 pb-2 mb-3">
-                        <span class="font-bold text-green-800 text-lg">${req.cn} <span class="text-xs font-normal text-gray-500 ml-2">${new Date(req.time).toLocaleString()}</span></span>
+                        <span class="font-bold text-green-800 text-lg">${req.cn} <span class="text-xs font-normal text-green-600 ml-2">${new Date(req.time).toLocaleString()}</span></span>
                         <div class="flex items-center gap-2">
                             <select onchange="updateShipAdminReq('${req.id}', 'status', this.value)" class="border rounded px-2 py-1 text-sm font-bold ${req.status==='已排发'?'text-green-600 border-green-300':req.status==='需补邮'?'text-red-500 border-red-300':'text-yellow-600 border-yellow-300'}">
                                 <option value="处理中" ${req.status==='处理中'?'selected':''}>⏳ 处理中</option>
@@ -87,7 +87,7 @@
                     </div>
                     <div class="mb-3">${itemsHtml}${toggleBtn}</div>
                     ${buyerProofArea}
-                    <div class="text-sm space-y-1 mb-3 text-gray-700">
+                    <div class="text-sm space-y-1 mb-3 text-green-800">
                         <p><strong>是否已付邮费：</strong><span class="${req.isPaid==='是'?'text-green-600':'text-red-500'} font-bold">${req.isPaid}</span></p>
                         <p><strong>收件地址：</strong>${req.address}</p>
                         <p><strong>快递要求：</strong>${req.express || '无'}</p>
@@ -208,25 +208,35 @@
             }
         }            
 
-        window.renderCloudSettings = function() {
+        // P16: 图床配置独立渲染
+        window.renderImageHostConfig = function() {
+            let hostConfig = JSON.parse(imageUrlData['__IMAGE_HOST_CONFIG__'] || '{}');
+            let html = `
+            <div class="flex flex-col gap-2">
+                <div><label class="text-xs text-indigo-600">图床 API 地址</label><input type="text" id="host_api_url" value="${hostConfig.api || ''}" placeholder="https://your-image-host.example.com/api" class="w-full border border-gray-300 focus:border-indigo-500 rounded px-2 py-1 text-sm"></div>
+                <div><label class="text-xs text-indigo-600">表单字段名 (默认: image)</label><input type="text" id="host_field" value="${hostConfig.field || ''}" placeholder="image" class="w-full border border-gray-300 focus:border-indigo-500 rounded px-2 py-1 text-sm"></div>
+                <div><label class="text-xs text-indigo-600">API Token/密钥 (可选)</label><input type="text" id="host_token" value="${hostConfig.token || ''}" placeholder="留空则不使用认证" class="w-full border border-gray-300 focus:border-indigo-500 rounded px-2 py-1 text-sm"></div>
+                <div><label class="text-xs text-indigo-600">响应中图片URL的JSON路径 (可选，例: data.links.url)</label><input type="text" id="host_resp_path" value="${hostConfig.respPath || ''}" placeholder="留空则自动识别" class="w-full border border-gray-300 focus:border-indigo-500 rounded px-2 py-1 text-sm"></div>
+            </div>`;
+            document.getElementById('cloudImageHostConfig').innerHTML = html;
+        };
+
+        // P16: 图床配置独立保存
+        window.saveImageHostConfig = async function() {
+            let hostApi = document.getElementById('host_api_url').value.trim();
+            let hostField = document.getElementById('host_field').value.trim();
+            let hostToken = document.getElementById('host_token').value.trim();
+            let hostRespPath = document.getElementById('host_resp_path').value.trim();
+            imageUrlData['__IMAGE_HOST_CONFIG__'] = JSON.stringify({ api: hostApi, field: hostField, token: hostToken, respPath: hostRespPath });
+            saveImageUrlData();
+            showToast('图床配置保存成功！', 'success');
+        };
+
+        window.renderLocationSettings = function() {
             let locs = [...new Set(groupData.map(i => i.location))].filter(l => l);
             let settings = JSON.parse(imageUrlData['__LOCATION_SETTINGS__'] || '{}');
-            let hostConfig = JSON.parse(imageUrlData['__IMAGE_HOST_CONFIG__'] || '{}');
             let html = '';
-
-            // 图床配置
-            html += `
-            <div class="border border-indigo-200 p-3 rounded bg-indigo-50 shadow-sm mb-4">
-                <h4 class="font-bold text-indigo-700 mb-2">🖼️ 图床 API 配置</h4>
-                <div class="flex flex-col gap-2">
-                    <div><label class="text-xs text-gray-500">图床 API 地址</label><input type="text" id="host_api_url" value="${hostConfig.api || ''}" placeholder="https://esaimg.cdn1.vip/api/v1.php" class="w-full border border-gray-300 focus:border-indigo-500 rounded px-2 py-1 text-sm"></div>
-                    <div><label class="text-xs text-gray-500">表单字段名 (默认: image)</label><input type="text" id="host_field" value="${hostConfig.field || ''}" placeholder="image" class="w-full border border-gray-300 focus:border-indigo-500 rounded px-2 py-1 text-sm"></div>
-                    <div><label class="text-xs text-gray-500">API Token/密钥 (可选)</label><input type="text" id="host_token" value="${hostConfig.token || ''}" placeholder="留空则不使用认证" class="w-full border border-gray-300 focus:border-indigo-500 rounded px-2 py-1 text-sm"></div>
-                    <div><label class="text-xs text-gray-500">响应中图片URL的JSON路径 (可选，例: data.links.url)</label><input type="text" id="host_resp_path" value="${hostConfig.respPath || ''}" placeholder="留空则自动识别" class="w-full border border-gray-300 focus:border-indigo-500 rounded px-2 py-1 text-sm"></div>
-                </div>
-            </div>`;
-
-            if(locs.length === 0) { html += '<p class="text-sm text-gray-400 text-center mt-4">暂无囤货地数据，请先在排发工作台给谷子设置囤货地。</p>'; }
+            if(locs.length === 0) { html += '<p class="text-sm text-gray-500 text-center mt-4">暂无囤货地数据，请先在排发工作台给谷子设置囤货地。</p>'; }
             locs.forEach(loc => {
                 let cost = settings[loc]?.cost || '';
                 let url = settings[loc]?.url || '';
@@ -240,7 +250,13 @@
                 </div>`;
             });
             document.getElementById('cloudLocationSettings').innerHTML = html;
-        }
+        };
+
+        // 兼容旧调用: 一次渲染所有云端设置
+        window.renderCloudSettings = function() {
+            renderImageHostConfig();
+            renderLocationSettings();
+        };
 
         window.saveLocationSettings = async function() {
             let locs = [...new Set(groupData.map(i => i.location))].filter(l => l);
@@ -251,15 +267,193 @@
                     url: document.getElementById(`loc_url_${loc}`).value.trim()
                 };
             });
-            let hostApi = document.getElementById('host_api_url').value.trim();
-            let hostField = document.getElementById('host_field').value.trim();
-            let hostToken = document.getElementById('host_token').value.trim();
-            let hostRespPath = document.getElementById('host_resp_path').value.trim();
-            imageUrlData['__IMAGE_HOST_CONFIG__'] = JSON.stringify({ api: hostApi, field: hostField, token: hostToken, respPath: hostRespPath });
             imageUrlData['__LOCATION_SETTINGS__'] = JSON.stringify(settings);
             saveImageUrlData();
-            showToast('云端配置保存成功！', 'success');
+            showToast('邮费配置保存成功！', 'success');
         }
+
+        // P15: 计算图片平均亮度，返回建议遮罩透明度
+        window.calcOverlayOpacity = function(imgUrl, callback) {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = function() {
+                const c = document.createElement('canvas');
+                const s = 10; // 10x10 采样
+                c.width = s; c.height = s;
+                const ctx = c.getContext('2d');
+                ctx.drawImage(img, 0, 0, s, s);
+                const data = ctx.getImageData(0, 0, s, s).data;
+                let sum = 0, count = 0;
+                for (let i = 0; i < data.length; i += 4) { sum += (data[i]*0.299 + data[i+1]*0.587 + data[i+2]*0.114); count++; }
+                const avg = sum / count; // 0-255
+                // 亮图(>128) → 深遮罩 0.5, 暗图(<128) → 浅遮罩 0.25
+                const opacity = avg > 160 ? 0.55 : avg > 128 ? 0.45 : avg > 80 ? 0.35 : 0.2;
+                callback(opacity);
+            };
+            img.onerror = function() { callback(0.4); }; // fallback
+            img.src = imgUrl;
+        };
+
+        // P15: 背景配置渲染
+        window.renderBgConfig = function() {
+            let config = JSON.parse(imageUrlData['__APP_CONFIG__'] || '{}');
+            let bgType = config.bgType || 'none';
+            let bgColor = config.bgColor || '#f3f4f6';
+            let bgUrl = config.bgUrl || '';
+            let bgOpacity = config.bgOpacity || 0.4;
+            let html = `
+            <div class="flex flex-col gap-3">
+                <div><label class="text-xs text-pink-600">背景类型</label>
+                    <select id="bgTypeSelect" onchange="document.getElementById('bgColorRow').style.display=this.value==='color'?'block':'none';document.getElementById('bgImageRow').style.display=this.value==='image'?'block':'none';" class="w-full border rounded px-2 py-1.5 text-sm">
+                        <option value="none" ${bgType==='none'?'selected':''}>默认灰色</option>
+                        <option value="color" ${bgType==='color'?'selected':''}>纯色背景</option>
+                        <option value="image" ${bgType==='image'?'selected':''}>图片背景</option>
+                    </select>
+                </div>
+                <div id="bgColorRow" style="display:${bgType==='color'?'block':'none'}">
+                    <label class="text-xs text-pink-600">背景颜色</label>
+                    <div class="flex gap-2 items-center">
+                        <input type="color" id="bgColorInput" value="${bgColor}" class="w-10 h-10 border rounded cursor-pointer">
+                        <input type="text" id="bgColorText" value="${bgColor}" oninput="document.getElementById('bgColorInput').value=this.value" class="flex-1 border rounded px-2 py-1 text-sm">
+                    </div>
+                </div>
+                <div id="bgImageRow" style="display:${bgType==='image'?'block':'none'}">
+                    <label class="text-xs text-pink-600">背景图片（自动添加遮罩）</label>
+                    <div class="flex gap-2 items-center">
+                        <input type="text" id="bgUrlInput" value="${bgUrl}" placeholder="粘贴图床直链..." class="flex-1 border rounded px-2 py-1 text-sm">
+                        <input type="file" accept="image/*" onchange="handleBgUpload(this)" class="hidden" id="bgFileInput">
+                        <button onclick="document.getElementById('bgFileInput').click()" class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1.5 rounded hover:bg-indigo-200 font-bold">📤 上传</button>
+                    </div>
+                    <div class="mt-2 flex items-center gap-2">
+                        <label class="text-xs text-pink-600">遮罩透明度:</label>
+                        <input type="range" id="bgOverlaySlider" min="0" max="60" value="${Math.round(bgOpacity*100)}" class="flex-1">
+                        <span id="bgOverlayLabel" class="text-xs text-pink-600 w-8">${Math.round(bgOpacity*100)}%</span>
+                    </div>
+                    <div id="bgPreviewArea" class="mt-2 ${bgUrl?'':'hidden'}">
+                        <p class="text-xs text-pink-500 mb-1">预览（含遮罩效果）:</p>
+                        <div id="bgPreviewBox" style="width:100%;height:80px;background:${bgColor} url(${bgUrl}) center/cover;position:relative;border-radius:4px;border:1px solid #ddd;">
+                            <div style="position:absolute;inset:0;background:rgba(0,0,0,${bgOpacity});border-radius:4px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+            document.getElementById('cloudBgConfig').innerHTML = html;
+            document.getElementById('bgOverlaySlider')?.addEventListener('input', function() {
+                document.getElementById('bgOverlayLabel').textContent = this.value + '%';
+                const previewBox = document.getElementById('bgPreviewBox');
+                if(previewBox) { const overlay = previewBox.querySelector('div'); overlay.style.background = `rgba(0,0,0,${this.value/100})`; }
+            });
+        };
+
+        // P15: 上传背景图 → 图床 → 自动计算遮罩
+        window.handleBgUpload = function(inputEl) {
+            const file = inputEl.files[0]; if (!file) return;
+            showLoading('上传背景图中...');
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function(e) {
+                const img = new Image(); img.src = e.target.result;
+                img.onload = async function() {
+                    const canvas = document.createElement('canvas');
+                    let w = img.width, h = img.height, MAX = 1200;
+                    if (w > h && w > MAX) { h *= MAX / w; w = MAX; }
+                    else if (h > MAX) { w *= MAX / h; h = MAX; }
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    const compressed = canvas.toDataURL('image/jpeg', 0.7);
+                    const remoteUrl = await uploadToImageHost(compressed);
+                    hideLoading();
+                    if (remoteUrl) {
+                        document.getElementById('bgUrlInput').value = remoteUrl;
+                        document.getElementById('bgPreviewArea').classList.remove('hidden');
+                        calcOverlayOpacity(remoteUrl, function(opacity) {
+                            document.getElementById('bgOverlaySlider').value = Math.round(opacity * 100);
+                            document.getElementById('bgOverlayLabel').textContent = Math.round(opacity * 100) + '%';
+                            updateBgPreview(remoteUrl, opacity);
+                        });
+                        showToast('背景图上传成功！', 'success');
+                    } else {
+                        showToast('背景图上传失败！', 'error');
+                    }
+                    inputEl.value = '';
+                };
+            };
+        };
+
+        function updateBgPreview(url, opacity) {
+            const box = document.getElementById('bgPreviewBox');
+            if (box) {
+                box.style.backgroundImage = `url(${url})`;
+                box.querySelector('div').style.background = `rgba(0,0,0,${opacity})`;
+            }
+        }
+
+        // P15: 保存背景配置
+        window.saveBgConfig = async function() {
+            let config = JSON.parse(imageUrlData['__APP_CONFIG__'] || '{}');
+            config.bgType = document.getElementById('bgTypeSelect').value;
+            config.bgColor = document.getElementById('bgColorText')?.value || '#f3f4f6';
+            config.bgUrl = document.getElementById('bgUrlInput')?.value || '';
+            config.bgOpacity = parseInt(document.getElementById('bgOverlaySlider')?.value || '40') / 100;
+            imageUrlData['__APP_CONFIG__'] = JSON.stringify(config);
+            saveImageUrlData();
+            if (typeof applyBackground === 'function') applyBackground();
+            showToast('背景配置保存成功！', 'success');
+        };
+
+        window.updateBgPreview = updateBgPreview;
+
+        // P12: 功能开关渲染
+        window.renderFeatureToggles = function() {
+            let config = JSON.parse(imageUrlData['__APP_CONFIG__'] || '{}');
+            let features = config.features || {};
+            let piggyOn = features.piggyRank !== false; // 默认 true
+            var intlOn = features.intlFreight !== false;
+            var html = `
+            <div class="space-y-3">
+                <div class="flex items-center justify-between py-2 border-b border-gray-100">
+                    <div>
+                        <p class="font-bold text-sm">🐷 ！？猪猪？！</p>
+                        <p class="text-xs text-amber-600">首页"吃谷成就排名"入口</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="toggle_piggyRank" ${piggyOn ? 'checked' : ''} class="sr-only peer">
+                        <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-pink-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+                    </label>
+                </div>
+                <div class="flex items-center justify-between py-2 border-b border-gray-100">
+                    <div>
+                        <p class="font-bold text-sm">🌍 国际运费计算 & 排发表</p>
+                        <p class="text-xs text-amber-600">仪表盘"国际运费"入口</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="toggle_intlFreight" ${intlOn ? 'checked' : ''} class="sr-only peer">
+                        <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-indigo-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+                    </label>
+                </div>
+            </div>`;
+            document.getElementById('cloudFeatureToggles').innerHTML = html;
+        };
+
+        // P12: 保存功能开关
+        window.saveFeatureToggles = async function() {
+            let config = JSON.parse(imageUrlData['__APP_CONFIG__'] || '{}');
+            if (!config.features) config.features = {};
+            config.features.piggyRank = document.getElementById('toggle_piggyRank').checked;
+            config.features.intlFreight = document.getElementById('toggle_intlFreight').checked;
+            imageUrlData['__APP_CONFIG__'] = JSON.stringify(config);
+            saveImageUrlData();
+            if (typeof applyFeatureToggles === 'function') applyFeatureToggles();
+            showToast('功能开关保存成功！', 'success');
+        };
+
+        // P12: 应用功能开关到DOM
+        window.applyFeatureToggles = function() {
+            var piggyBtn = document.querySelector('#portal-screen button[onclick*="rank-screen"]');
+            if (piggyBtn) piggyBtn.style.display = isFeatureEnabled('piggyRank') ? '' : 'none';
+            var intlTab = document.getElementById('tab-intl-freight');
+            if (intlTab) intlTab.style.display = isFeatureEnabled('intlFreight') ? '' : 'none';
+        };
 
         window.openReuseImageModal = function() {
             const currentBatch = document.getElementById('imageBatchSelect').value;
